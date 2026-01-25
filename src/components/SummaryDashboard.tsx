@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import type { UserProfile, FoodItem } from '../constants';
+import type { FoodItem } from '../constants';
+import type { UserProfile } from '../types/api';
 import { Check, Flame, ChevronRight, PenLine } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { EditGoals } from './EditGoals';
 import { Nutridex } from './Nutridex';
 
+import type { DashboardResponse } from '../types/api';
+
 interface SummaryDashboardProps {
-    user: UserProfile;    // keep for compatibility if needed
-    foodLog: FoodItem[];  // keep for compatibility
+    user: UserProfile | null;
+    foodLog: FoodItem[];
+    dashboardData: DashboardResponse | null;
 }
 
 // Circular Macro Widget
@@ -54,34 +58,96 @@ const MacroCircle = ({ label, current, total, color, percent }: { label: string,
     );
 };
 
-export const SummaryDashboard = ({ }: SummaryDashboardProps) => {
+export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps) => {
     const [showEditGoals, setShowEditGoals] = useState(false);
     const [showNutridex, setShowNutridex] = useState(false);
 
-    // Mock Data based on screenshot
-    const streakDays = 93;
+    // Derived state
+    const userName = user?.name || 'User';
+
+    // Use Real Data
+    const calories = {
+        current: dashboardData?.macro_rings?.calories?.consumed || 0,
+        total: dashboardData?.macro_rings?.calories?.limit || 2000
+    };
+    const rawProgress = (calories.current / calories.total) * 100;
+    const progress = Number.isFinite(rawProgress) ? Math.min(rawProgress, 100) : 0;
+
+    // Smart Streak Calculation
+    const streakDays = (() => {
+        if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
+
+        // Get unique dates sorted descending
+        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.time || Date.now()).toDateString())))
+            .map(d => new Date(d))
+            .sort((a, b) => b.getTime() - a.getTime());
+
+        if (dates.length === 0) return 0;
+
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Check if most recent is today or yesterday
+        const lastLogDate = dates[0];
+        if (lastLogDate.toDateString() !== today.toDateString() &&
+            lastLogDate.toDateString() !== yesterday.toDateString()) {
+            return 0;
+        }
+
+        let streak = 1;
+        for (let i = 0; i < dates.length - 1; i++) {
+            const curr = dates[i];
+            const next = dates[i + 1];
+            const diffTime = Math.abs(curr.getTime() - next.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                streak++;
+            } else {
+                break;
+            }
+        }
+        return streak;
+    })();
+
     const weekDays = [
-        { day: 'M', status: 'checked' },
-        { day: 'T', status: 'checked' },
-        { day: 'W', status: 'checked' },
-        { day: 'T', status: 'checked' },
+        { day: 'M', status: 'pending' },
+        { day: 'T', status: 'pending' },
+        { day: 'W', status: 'pending' },
+        { day: 'T', status: 'pending' },
         { day: 'F', status: 'pending' },
         { day: 'S', status: 'pending' },
         { day: 'S', status: 'pending' },
     ];
+    // Simple logic to check off days based on actual history logs
+    if (dashboardData?.history) {
+        const loggedDayIndices = new Set(dashboardData.history.map(h => {
+            const d = new Date(h.time || Date.now()).getDay(); // 0 is Sunday
+            return d === 0 ? 6 : d - 1; // Map to 0-6 (Mon-Sun) if array starts Monday
+        }));
 
-    const calories = { current: 2062, total: 2705 };
-    const progress = (calories.current / calories.total) * 100;
+        weekDays.forEach((d, idx) => {
+            if (loggedDayIndices.has(idx)) d.status = 'checked';
+        });
+    }
 
     if (showNutridex) {
-        return <Nutridex onBack={() => setShowNutridex(false)} />;
+        return (
+            <Nutridex
+                onBack={() => setShowNutridex(false)}
+                consumed={dashboardData?.macro_rings?.calories?.consumed || 0}
+                limit={dashboardData?.macro_rings?.calories?.limit || 2000}
+                log={dashboardData?.history || []} // Use real history from API
+            />
+        );
     }
 
     return (
         <div className="p-6 pt-10 space-y-8 min-h-screen bg-black">
             {/* Header */}
             <header className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">Summary</h1>
+                <h1 className="text-3xl font-bold text-white">Hello, <span className="text-emerald-500">{userName}!</span></h1>
                 <button
                     onClick={() => setShowEditGoals(true)}
                     className="flex items-center gap-2 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-800 text-orange-500 text-sm font-medium hover:bg-zinc-800 transition-colors"
@@ -91,8 +157,8 @@ export const SummaryDashboard = ({ }: SummaryDashboardProps) => {
                 </button>
             </header>
 
-            {/* Streak Card */}
-            <div className="bg-zinc-900/50 rounded-[2rem] p-6 border border-zinc-800/50">
+            {/* Streak Card - Dark with Green Checks */}
+            <div className="bg-zinc-900 rounded-[2rem] p-6 relative overflow-hidden">
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-500/10 rounded-xl">
@@ -162,20 +228,39 @@ export const SummaryDashboard = ({ }: SummaryDashboardProps) => {
                             />
                         </div>
                         <div className="text-right">
-                            <span className="text-xs font-bold text-white">76%</span>
+                            <span className="text-xs font-bold text-white">{Math.round(progress)}%</span>
                         </div>
                     </div>
 
-                    {/* Micros Cards */}
+                    {/* Micros Cards - Using real data if available, else 0 */}
+                    {/* Micros Cards - Updated Colors & Style */}
                     <div className="grid grid-cols-3 gap-3">
-                        <MacroCircle label="PROTEIN" current={46} total={196} percent={23} color="stroke-emerald-500" />
-                        <MacroCircle label="CARBS" current={375} total={338} percent={100} color="stroke-amber-400" />
-                        <MacroCircle label="FAT" current={42} total={63} percent={67} color="stroke-orange-400" />
+                        <MacroCircle
+                            label="PROTEIN"
+                            current={dashboardData?.macro_rings?.protein?.consumed || 0}
+                            total={dashboardData?.macro_rings?.protein?.limit || 150}
+                            percent={dashboardData?.macro_rings?.protein ? (Number.isFinite((dashboardData.macro_rings.protein.consumed / dashboardData.macro_rings.protein.limit)) ? Math.round((dashboardData.macro_rings.protein.consumed / dashboardData.macro_rings.protein.limit) * 100) : 0) : 0}
+                            color="stroke-emerald-500" // Green
+                        />
+                        <MacroCircle
+                            label="CARBS"
+                            current={dashboardData?.macro_rings?.sugar?.consumed || 0} // Using Sugar until Carbs logic fixed
+                            total={dashboardData?.macro_rings?.sugar?.limit || 250}
+                            percent={dashboardData?.macro_rings?.sugar ? (Number.isFinite((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit)) ? Math.min(Math.round((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit) * 100), 100) : 0) : 0}
+                            color="stroke-amber-400" // Yellow
+                        />
+                        <MacroCircle
+                            label="FAT"
+                            current={dashboardData?.macro_rings?.fat?.consumed || 0}
+                            total={dashboardData?.macro_rings?.fat?.limit || 65}
+                            percent={dashboardData?.macro_rings?.fat ? (Number.isFinite((dashboardData.macro_rings.fat.consumed / dashboardData.macro_rings.fat.limit)) ? Math.round((dashboardData.macro_rings.fat.consumed / dashboardData.macro_rings.fat.limit) * 100) : 0) : 0}
+                            color="stroke-orange-600" // Dark Orange/Brown
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Nutridex Banner (Optional based on screenshot bottom) */}
+            {/* Nutridex Banner */}
             <button
                 onClick={() => setShowNutridex(true)}
                 className="w-full bg-zinc-900/50 rounded-2xl p-4 flex items-center justify-between border border-zinc-800 hover:bg-zinc-800/80 transition-colors"
@@ -184,7 +269,10 @@ export const SummaryDashboard = ({ }: SummaryDashboardProps) => {
                     <div className="p-1.5 bg-emerald-900/30 rounded-lg">
                         <PenLine size={16} className="text-emerald-500" />
                     </div>
-                    <span className="font-medium text-white">Nutridex <span className="text-zinc-500">(44.49%)</span></span>
+                    {/* Use Nutridex Score if available, else use "N/A" to avoid confusing 100% */}
+                    <span className="font-medium text-white">Nutridex <span className="text-zinc-500">
+                        ({dashboardData?.nutridex_score !== undefined ? dashboardData.nutridex_score : '--'})%
+                    </span></span>
                 </div>
                 <ChevronRight className="text-zinc-600" size={18} />
             </button>

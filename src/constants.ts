@@ -28,16 +28,23 @@ export interface Goal {
 
 export interface FoodItem {
     name: string;
-    type: 'SAFE' | 'WARNING' | 'DANGER';
+    type: 'SAFE' | 'WARNING' | 'DANGER' | 'ALLERGY';
     calories: number;
     sugar: number; // g
     fiber: number; // g
     protein: number; // g
     image: string;
     message: string;
-    swaps?: string[];
+    subtitle?: string;
+    risks?: string[];
+    swaps?: string[]; // Simplified to string array based on new backend
+    summaryGrid?: Array<{ emoji: string, label: string, value: string, color: string }>;
     benefits?: string[];
     subIngredients?: SubIngredient[];
+    comparison_note?: string; // e.g. "Healthy limit: <5g sugar"
+    tags?: string[];
+    aiAnalysis?: string;
+    dailySugarPercent?: number; // New field for user progress
 }
 
 export const USER_PROFILE: UserProfile = {
@@ -97,7 +104,10 @@ export const FOOD_DATABASE: Record<string, FoodItem> = {
         protein: 1,
         image: 'https://images.unsplash.com/photo-1546173159-315724a31696?q=80&w=600&auto=format&fit=crop',
         message: "High sugar spike risk! 38g Sugar detected.",
-        swaps: ["Fresh Coconut Water", "Homemade Smoothie"],
+        swaps: [
+            "Fresh Coconut Water",
+            "Homemade Smoothie"
+        ],
         subIngredients: [
             { name: 'Mango Pulp', calories: 80, qty: '200ml', iconName: 'Citrus', iconColor: 'orange' },
             { name: 'Added Sugar', calories: 60, qty: '15g', iconName: 'Candy', iconColor: 'red' },
@@ -129,7 +139,10 @@ export const FOOD_DATABASE: Record<string, FoodItem> = {
         protein: 2,
         image: 'https://images.unsplash.com/photo-1566478919030-261611d08593?q=80&w=600&auto=format&fit=crop',
         message: "High sodium and processed fats.",
-        swaps: ["Roasted Chickpeas", "Kale Chips"],
+        swaps: [
+            "Roasted Chickpeas",
+            "Kale Chips"
+        ],
         subIngredients: [
             { name: 'Potato', calories: 150, qty: '100g', iconName: 'Egg', iconColor: 'yellow' },
             { name: 'Vegetable Oil', calories: 60, qty: '10ml', iconName: 'Droplet', iconColor: 'yellow' },

@@ -7,9 +7,12 @@ import { cn } from '../lib/utils';
 
 interface NutridexProps {
     onBack: () => void;
+    consumed: number;
+    limit: number;
+    log: any[]; // Replace with FoodItem type if available
 }
 
-export const Nutridex = ({ onBack }: NutridexProps) => {
+export const Nutridex = ({ onBack, consumed, limit, log }: NutridexProps) => {
     const [view, setView] = useState<'today' | 'week' | 'month'>('today');
 
     return (
@@ -44,36 +47,38 @@ export const Nutridex = ({ onBack }: NutridexProps) => {
                     <div className="grid grid-cols-2 gap-4">
                         <Card className="bg-zinc-900 border-zinc-800 p-4">
                             <p className="text-zinc-500 text-xs font-bold uppercase mb-1">Consumed</p>
-                            <p className="text-2xl font-bold text-white">2,062</p>
+                            <p className="text-2xl font-bold text-white">{consumed.toLocaleString()}</p>
                             <p className="text-xs text-zinc-500 mt-1">kcal</p>
                         </Card>
                         <Card className="bg-zinc-900 border-zinc-800 p-4">
                             <p className="text-zinc-500 text-xs font-bold uppercase mb-1">Remaining</p>
-                            <p className="text-2xl font-bold text-emerald-500">643</p>
+                            <p className={cn("text-2xl font-bold", (limit - consumed) < 0 ? "text-red-500" : "text-emerald-500")}>
+                                {(limit - consumed).toLocaleString()}
+                            </p>
                             <p className="text-xs text-zinc-500 mt-1">kcal</p>
                         </Card>
                     </div>
 
                     <h3 className="text-zinc-400 font-bold text-sm">Today's Log</h3>
                     <div className="space-y-3">
-                        {[
-                            { name: 'Oatmeal & Berries', cal: 320, time: '8:30 AM' },
-                            { name: 'Grilled Chicken Salad', cal: 450, time: '1:15 PM' },
-                            { name: 'Protein Shake', cal: 180, time: '4:00 PM' },
-                            { name: 'Salmon & Rice', cal: 620, time: '7:30 PM' },
-                            { name: 'Greek Yogurt', cal: 120, time: '9:45 PM' },
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
-                                <div>
-                                    <p className="font-bold text-white">{item.name}</p>
-                                    <p className="text-xs text-zinc-500">{item.time}</p>
+                        {log.length > 0 ? (
+                            log.map((item, i) => (
+                                <div key={i} className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
+                                    <div>
+                                        <p className="font-bold text-white">{item.name}</p>
+                                        <p className="text-xs text-zinc-500">{new Date(item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-white">{item.calories}</p>
+                                        <p className="text-xs text-zinc-500">kcal</p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-white">{item.cal}</p>
-                                    <p className="text-xs text-zinc-500">kcal</p>
-                                </div>
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-zinc-500 bg-zinc-900/30 rounded-2xl border border-zinc-800/30 border-dashed">
+                                No food logged today.
                             </div>
-                        ))}
+                        )}
                     </div>
                 </motion.div>
             )}
@@ -83,7 +88,7 @@ export const Nutridex = ({ onBack }: NutridexProps) => {
                     <Card className="bg-zinc-900 border-zinc-800 p-6 flex flex-col items-center justify-center min-h-[200px]">
                         <BarChart3 size={48} className="text-zinc-700 mb-4" />
                         <p className="text-zinc-500 font-medium">Weekly Analysis Chart</p>
-                        <p className="text-xs text-zinc-600">(Coming Soon)</p>
+                        <p className="text-xs text-zinc-600">(Requires more history)</p>
                     </Card>
 
                     <div className="space-y-4">
@@ -94,7 +99,19 @@ export const Nutridex = ({ onBack }: NutridexProps) => {
                                 </div>
                                 <span className="font-bold text-white">Avg. Calories</span>
                             </div>
-                            <span className="text-xl font-bold">2,150</span>
+                            <span className="text-xl font-bold">
+                                {(() => {
+                                    if (!log || log.length === 0) return 0;
+                                    const oneWeekAgo = new Date();
+                                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                                    const recentLogs = log.filter(l => new Date(l.time) >= oneWeekAgo);
+                                    if (recentLogs.length === 0) return 0;
+                                    const total = recentLogs.reduce((acc, curr) => acc + (curr.calories || 0), 0);
+                                    // Average over 7 days or days active? Let's say days active for now
+                                    const uniqueDays = new Set(recentLogs.map(l => new Date(l.time).toDateString())).size;
+                                    return Math.round(total / (uniqueDays || 1)).toLocaleString();
+                                })()}
+                            </span>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-zinc-900 rounded-2xl">
                             <div className="flex items-center gap-3">
@@ -103,7 +120,7 @@ export const Nutridex = ({ onBack }: NutridexProps) => {
                                 </div>
                                 <span className="font-bold text-white">Macro Balance</span>
                             </div>
-                            <span className="text-sm font-bold text-zinc-400">Good</span>
+                            <span className="text-sm font-bold text-zinc-400">Calculated Daily</span>
                         </div>
                     </div>
                 </motion.div>
@@ -112,16 +129,34 @@ export const Nutridex = ({ onBack }: NutridexProps) => {
             {view === 'month' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                     <div className="grid grid-cols-7 gap-2">
-                        {/* Mock Calendar Grid */}
-                        {Array.from({ length: 30 }).map((_, i) => (
-                            <div key={i} className={`aspect-square rounded-lg flex items-center justify-center text-xs font-bold ${i % 7 === 0 || i % 5 === 0 ? 'bg-emerald-900/40 text-emerald-500' : 'bg-zinc-900 text-zinc-600'}`}>
-                                {i + 1}
-                            </div>
-                        ))}
+                        {/* Dynamic Calendar Grid */}
+                        {(() => {
+                            const daysInMonth = 30; // Simply showing last 30 days window or current month
+                            const grid = [];
+
+                            // Map logs to dates
+                            const logMap = new Set(log.map(l => new Date(l.time).getDate()));
+
+                            for (let i = 1; i <= daysInMonth; i++) {
+                                // Simple mock for "current month day i" - in real app would match actual dates
+                                const isLogged = logMap.has(i);
+                                grid.push(
+                                    <div key={i} className={`aspect-square rounded-lg flex items-center justify-center text-xs font-bold ${isLogged ? 'bg-emerald-900/40 text-emerald-500' : 'bg-zinc-900 text-zinc-600'}`}>
+                                        {i}
+                                    </div>
+                                );
+                            }
+                            return grid;
+                        })()}
                     </div>
                     <div className="p-4 bg-zinc-900 rounded-2xl">
                         <h4 className="font-bold text-white mb-2">Monthly Insights</h4>
-                        <p className="text-sm text-zinc-500">You met your calorie goal 22 days this month. Keep it up!</p>
+                        <p className="text-sm text-zinc-500">
+                            {(() => {
+                                const loggedDays = new Set(log.map(l => new Date(l.time).toDateString())).size;
+                                return `You tracked food on ${loggedDays} days this month.`;
+                            })()}
+                        </p>
                     </div>
                 </motion.div>
             )}

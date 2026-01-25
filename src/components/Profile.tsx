@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import type { UserProfile } from '../constants';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Moon, Sun, Settings, ChevronRight, Activity, Plus, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface ProfileProps {
-    user: UserProfile;
+    user: any; // Relaxed type for compatibility with flat backend structure
     isDarkMode: boolean;
     toggleTheme: () => void;
+    onSettingsClick: () => void;
 }
 
-export const Profile = ({ user, isDarkMode, toggleTheme }: ProfileProps) => {
+export const Profile = ({ user, isDarkMode, toggleTheme, onSettingsClick }: ProfileProps) => {
     // Local state for conditions to verify interactivity
-    const [conditions, setConditions] = useState<string[]>(user.conditions);
+    const [conditions, setConditions] = useState<string[]>(user?.conditions || []);
     const [isAdding, setIsAdding] = useState(false);
     const [newCondition, setNewCondition] = useState("");
 
@@ -28,6 +28,18 @@ export const Profile = ({ user, isDarkMode, toggleTheme }: ProfileProps) => {
     const removeCondition = (idx: number) => {
         setConditions(conditions.filter((_, i) => i !== idx));
     };
+
+    if (!user) {
+        return (
+            <div className="p-6 pt-10 pb-24 space-y-6 flex flex-col items-center justify-center min-h-[50vh]">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <div className="w-24 h-24 bg-zinc-800 rounded-full"></div>
+                    <div className="h-6 w-32 bg-zinc-800 rounded"></div>
+                    <div className="h-4 w-48 bg-zinc-800 rounded"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 pt-10 pb-24 space-y-6">
@@ -48,21 +60,21 @@ export const Profile = ({ user, isDarkMode, toggleTheme }: ProfileProps) => {
                 <div className="space-y-4">
                     <div>
                         <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Gender</p>
-                        <p className="text-lg font-bold">{user.gender}</p>
+                        <p className="text-lg font-bold">{user.gender || 'Not Set'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Height</p>
-                        <p className="text-lg font-bold">{user.height} <span className="text-xs font-normal text-zinc-400">cm</span></p>
+                        <p className="text-lg font-bold">{user.height || 'Not Set'} <span className="text-xs font-normal text-zinc-400">cm</span></p>
                     </div>
                 </div>
                 <div className="space-y-4">
                     <div>
                         <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Age</p>
-                        <p className="text-lg font-bold">{user.age}</p>
+                        <p className="text-lg font-bold">{user.age ?? 'Not Set'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Weight</p>
-                        <p className="text-lg font-bold">{user.weight} <span className="text-xs font-normal text-zinc-400">kg</span></p>
+                        <p className="text-lg font-bold">{user.weight ?? user.weight_kg ?? 'Not Set'} <span className="text-xs font-normal text-zinc-400">kg</span></p>
                     </div>
                 </div>
             </Card>
@@ -125,7 +137,10 @@ export const Profile = ({ user, isDarkMode, toggleTheme }: ProfileProps) => {
                 </Card>
 
                 {/* Other Static Settings items */}
-                <Card className="flex items-center justify-between p-4 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                <Card
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    onClick={onSettingsClick}
+                >
                     <div className="flex items-center gap-3">
                         <div className="p-2 rounded-full bg-zinc-100 text-zinc-500 dark:bg-zinc-800">
                             <Settings size={20} />
