@@ -1,19 +1,47 @@
 import { useState } from 'react';
-import { X, Check, Calculator } from 'lucide-react';
+import { X, Check, Calculator, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DAILY_MACRO_TARGETS } from '../constants';
+import { api } from '../services/api';
 
 interface EditGoalsProps {
     isOpen: boolean;
     onClose: () => void;
+    userId: string;
+    onSaveSuccess: () => void;
 }
 
-export const EditGoals = ({ isOpen, onClose }: EditGoalsProps) => {
+export const EditGoals = ({ isOpen, onClose, userId, onSaveSuccess }: EditGoalsProps) => {
     const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly'>('daily');
     const [targets, setTargets] = useState({ ...DAILY_MACRO_TARGETS });
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleChange = (key: keyof typeof targets, value: string) => {
         setTargets(prev => ({ ...prev, [key]: parseInt(value) || 0 }));
+    };
+
+    const handleSave = async () => {
+        if (!userId) return;
+        setIsSaving(true);
+        try {
+            await api.updateProfile({
+                user_id: userId,
+                custom_goals: {
+                    daily_calories: targets.calories,
+                    daily_protein_g: targets.protein,
+                    daily_carbs_g: targets.carbs,
+                    daily_fat_g: targets.fat,
+                    daily_sugar_g: targets.sugar || 25
+                }
+            });
+            onSaveSuccess();
+            onClose();
+        } catch (error) {
+            console.error("Failed to save goals:", error);
+            alert("Failed to save goals. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -138,8 +166,13 @@ export const EditGoals = ({ isOpen, onClose }: EditGoalsProps) => {
 
                         {/* Save Button */}
                         <div className="p-6 border-t border-zinc-800 bg-zinc-900 absolute bottom-0 left-0 right-0">
-                            <button onClick={onClose} className="w-full bg-white text-black font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                                <Check size={20} /> Save Changes
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="w-full bg-white text-black font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+                            >
+                                {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
+                                {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
                     </motion.div>

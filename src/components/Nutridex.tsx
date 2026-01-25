@@ -67,6 +67,21 @@ export const Nutridex = ({ onBack, consumed, limit, log }: NutridexProps) => {
                                     <div>
                                         <p className="font-bold text-white">{item.name}</p>
                                         <p className="text-xs text-zinc-500">{new Date(item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+
+                                        {/* Rich History: Macro Badges */}
+                                        {item.macros && (
+                                            <div className="flex gap-2 mt-2">
+                                                <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                                    P: {item.macros.p}g
+                                                </span>
+                                                <span className="text-[10px] font-bold bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                                    C: {item.macros.c}g
+                                                </span>
+                                                <span className="text-[10px] font-bold bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                                    F: {item.macros.f}g
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="text-right">
                                         <p className="font-bold text-white">{item.calories}</p>

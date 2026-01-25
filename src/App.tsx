@@ -78,7 +78,7 @@ function App() {
     // Fallback logic: check scanResult -> ai_analysis -> default
     const foodName = scanResult.food_name || response.ui_cards?.ai_analysis?.item_name || "Unknown Food";
     console.log("Determined Food Name:", foodName, "Fallback Logic Triggered Check");
-    
+
     // Map backend response to frontend FoodItem format
     const mappedItem: FoodItem = {
       name: foodName,
@@ -247,6 +247,7 @@ function App() {
             user={userProfile}
             foodLog={foodLog}
             dashboardData={dashboardData}
+            onRefresh={handleSplashReady}
           />
         );
       case 'scanner':
@@ -281,6 +282,7 @@ function App() {
             user={userProfile}
             foodLog={foodLog}
             dashboardData={dashboardData}
+            onRefresh={handleSplashReady}
           />
         );
     }

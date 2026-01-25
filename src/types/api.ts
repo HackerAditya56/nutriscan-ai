@@ -37,6 +37,13 @@ export interface ConfirmProfileRequest {
     dietary_preferences?: {
         type: string;
     };
+    custom_goals?: {
+        daily_calories: number;
+        daily_protein_g: number;
+        daily_carbs_g: number;
+        daily_fat_g: number;
+        daily_sugar_g: number;
+    };
 }
 
 export interface ConfirmProfileResponse {
@@ -159,18 +166,22 @@ export interface DashboardResponse {
     macro_rings: {
         calories: MacroRing;
         sugar: MacroRing;
-        protein?: MacroRing; // Currently missing
-        fat?: MacroRing;     // Currently missing
-        carbs?: MacroRing;   // Currently missing
+        protein?: MacroRing;
+        fat?: MacroRing;
+        carbs?: MacroRing;
     };
     history: Array<{
         time: string;
         food: string;
-        calories?: number; // Currently missing
+        calories?: number;
+        macros?: {
+            p: number; // Protein
+            c: number; // Carbs
+            f: number; // Fat
+            s?: number; // Sugar (Optional)
+        };
     }>;
 }
-
-// ========== PROFILE ==========
 
 export interface UserProfile {
     name: string;
@@ -186,6 +197,13 @@ export interface UserProfile {
         daily_calories: number;
         daily_sugar_g: number;
         bmr?: number;
+    };
+    custom_goals?: {
+        daily_calories: number;
+        daily_protein_g: number;
+        daily_carbs_g: number;
+        daily_fat_g: number;
+        daily_sugar_g: number;
     };
 }
 
@@ -217,11 +235,18 @@ export interface ProfileResponse {
 export interface UpdateProfileRequest {
     user_id: string;
     name?: string;
-    profile: AIFindings;
+    profile?: AIFindings; // Made optional for partial updates like custom_goals
     water_tds?: number;
     activity_level?: string;
     dietary_preferences?: {
         type: string;
+    };
+    custom_goals?: {
+        daily_calories: number;
+        daily_protein_g: number;
+        daily_carbs_g: number;
+        daily_fat_g: number;
+        daily_sugar_g: number;
     };
 }
 

@@ -58,7 +58,7 @@ const MacroCircle = ({ label, current, total, color, percent }: { label: string,
     );
 };
 
-export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps) => {
+export const SummaryDashboard = ({ user, dashboardData, onRefresh }: SummaryDashboardProps & { onRefresh?: () => void }) => {
     const [showEditGoals, setShowEditGoals] = useState(false);
     const [showNutridex, setShowNutridex] = useState(false);
 
@@ -157,8 +157,12 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
                 </button>
             </header>
 
-            {/* Streak Card - Dark with Green Checks */}
-            <div className="bg-zinc-900 rounded-[2rem] p-6 relative overflow-hidden">
+            {/* Streak Card - Clickable */}
+            <button
+                onClick={() => setShowNutridex(true)}
+                className="w-full bg-zinc-900 rounded-[2rem] p-6 relative overflow-hidden text-left hover:bg-zinc-800/80 transition-colors"
+                title="View Nutridex"
+            >
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-500/10 rounded-xl">
@@ -193,7 +197,7 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
                         </div>
                     ))}
                 </div>
-            </div>
+            </button>
 
             {/* Overview Section */}
             <div>
@@ -232,8 +236,7 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
                         </div>
                     </div>
 
-                    {/* Micros Cards - Using real data if available, else 0 */}
-                    {/* Micros Cards - Updated Colors & Style */}
+                    {/* Micros Cards */}
                     <div className="grid grid-cols-3 gap-3">
                         <MacroCircle
                             label="PROTEIN"
@@ -244,7 +247,7 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
                         />
                         <MacroCircle
                             label="CARBS"
-                            current={dashboardData?.macro_rings?.sugar?.consumed || 0} // Using Sugar until Carbs logic fixed
+                            current={dashboardData?.macro_rings?.sugar?.consumed || 0}
                             total={dashboardData?.macro_rings?.sugar?.limit || 250}
                             percent={dashboardData?.macro_rings?.sugar ? (Number.isFinite((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit)) ? Math.min(Math.round((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit) * 100), 100) : 0) : 0}
                             color="stroke-amber-400" // Yellow
@@ -269,7 +272,6 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
                     <div className="p-1.5 bg-emerald-900/30 rounded-lg">
                         <PenLine size={16} className="text-emerald-500" />
                     </div>
-                    {/* Use Nutridex Score if available, else use "N/A" to avoid confusing 100% */}
                     <span className="font-medium text-white">Nutridex <span className="text-zinc-500">
                         ({dashboardData?.nutridex_score !== undefined ? dashboardData.nutridex_score : '--'})%
                     </span></span>
@@ -279,7 +281,12 @@ export const SummaryDashboard = ({ user, dashboardData }: SummaryDashboardProps)
 
             <div className="h-20"></div>
 
-            <EditGoals isOpen={showEditGoals} onClose={() => setShowEditGoals(false)} />
+            <EditGoals
+                isOpen={showEditGoals}
+                onClose={() => setShowEditGoals(false)}
+                userId={dashboardData?.user_id || ''}
+                onSaveSuccess={() => onRefresh && onRefresh()}
+            />
         </div>
     );
 };

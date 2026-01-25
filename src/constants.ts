@@ -62,6 +62,7 @@ export const DAILY_MACRO_TARGETS = {
     protein: 120, // g
     carbs: 250, // g
     fat: 70, // g
+    sugar: 25, // g
 };
 
 export const INITIAL_GOALS: Goal[] = [
