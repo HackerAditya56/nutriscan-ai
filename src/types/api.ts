@@ -7,6 +7,7 @@ export interface AIFindings {
     gender: string;
     weight_kg: number;
     height_cm: number;
+    bmi?: number;
     conditions: string[];
     allergies: string[];
     activity_level_inference: string;

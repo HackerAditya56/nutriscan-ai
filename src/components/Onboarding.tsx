@@ -125,12 +125,18 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
             const activityLevels = ['sedentary', 'light', 'moderate', 'active', 'athlete'];
             const activityLevel = activityLevels[data.activityLevel - 1] || 'moderate';
 
+            // Calculate BMI
+            const heightM = data.height / 100;
+            const bmi = heightM > 0 ? parseFloat((data.weight / (heightM * heightM)).toFixed(1)) : 0;
+
             // Create fallback profile if no medical report was uploaded
+            // IMPORTANT: Ensure structure matches what backend expects for "profile" field
             const finalProfile: AIFindings = profileBlob || {
                 age: data.age,
                 gender: data.gender,
                 weight_kg: data.weight,
                 height_cm: data.height,
+                bmi: bmi, // Added BMI
                 conditions: data.conditions,
                 allergies: data.allergies,
                 activity_level_inference: activityLevel,

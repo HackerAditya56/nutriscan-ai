@@ -17,12 +17,13 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
     const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
 
     // Local editable state
-    const [age, setAge] = useState(0);
+    // Local editable state - Init with undefined to show placeholders/empty
+    const [age, setAge] = useState<number | undefined>(undefined);
     const [gender, setGender] = useState('M');
-    const [height, setHeight] = useState(0);
-    const [weight, setWeight] = useState(0);
+    const [height, setHeight] = useState<number | undefined>(undefined);
+    const [weight, setWeight] = useState<number | undefined>(undefined);
     const [dietaryType, setDietaryType] = useState('Veg');
-    const [waterTDS, setWaterTDS] = useState(0);
+    const [waterTDS, setWaterTDS] = useState<number | undefined>(undefined);
     const [activityLevel, setActivityLevel] = useState('moderate');
     const [allergies, setAllergies] = useState<string[]>([]);
     const [newAllergy, setNewAllergy] = useState('');
@@ -87,10 +88,10 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
 
             // Build AIFindings structure for update
             const updatedProfile: AIFindings = {
-                age,
+                age: age || 0,
                 gender,
-                weight_kg: weight,
-                height_cm: height,
+                weight_kg: weight || 0,
+                height_cm: height || 0,
                 conditions: profileData.conditions || [],
                 allergies: allergies,
                 activity_level_inference: activityLevel,
@@ -104,14 +105,14 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
             await api.updateProfile({
                 user_id: userId,
                 profile: updatedProfile,
-                water_tds: waterTDS,
+                water_tds: waterTDS || 0,
                 activity_level: activityLevel,
                 dietary_preferences: {
                     type: dietaryType
                 }
             });
 
-            alert('Profile updated successfully!');
+            alert('Health summary updated! The AI has processed your changes.');
             onBack();
         } catch (error) {
             console.error('Failed to save profile:', error);
@@ -177,9 +178,14 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                     <Button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 rounded-full"
+                        className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 rounded-full flex items-center gap-2"
                     >
-                        {isSaving ? 'Saving...' : 'Save'}
+                        {isSaving ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                <span>AI Updating...</span>
+                            </>
+                        ) : 'Save'}
                     </Button>
                 </div>
             </div>
@@ -197,7 +203,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Age</label>
-                                <input type="number" value={age} onChange={(e) => setAge(parseInt(e.target.value) || 0)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500" />
+                                <input type="number" value={age ?? ''} onChange={(e) => setAge(parseInt(e.target.value) || undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
                             </div>
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Gender</label>
@@ -209,11 +215,11 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             </div>
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Height (cm)</label>
-                                <input type="number" value={height} onChange={(e) => setHeight(parseInt(e.target.value) || 0)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500" />
+                                <input type="number" value={height ?? ''} onChange={(e) => setHeight(parseInt(e.target.value) || undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
                             </div>
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Weight (kg)</label>
-                                <input type="number" value={weight} onChange={(e) => setWeight(parseInt(e.target.value) || 0)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500" />
+                                <input type="number" value={weight ?? ''} onChange={(e) => setWeight(parseInt(e.target.value) || undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
                             </div>
                         </div>
                         <div>
@@ -281,9 +287,10 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                         <label className="text-xs text-zinc-400 block mb-2">TDS (ppm)</label>
                         <input
                             type="number"
-                            value={waterTDS}
-                            onChange={(e) => setWaterTDS(parseInt(e.target.value) || 0)}
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500"
+                            value={waterTDS ?? ''}
+                            onChange={(e) => setWaterTDS(parseInt(e.target.value) || undefined)}
+                            placeholder="Not Set"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600"
                         />
                         <p className="text-xs text-zinc-500 mt-2">
                             Total Dissolved Solids in your drinking water
