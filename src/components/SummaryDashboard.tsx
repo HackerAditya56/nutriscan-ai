@@ -13,6 +13,7 @@ interface SummaryDashboardProps {
     user: UserProfile | null;
     foodLog: FoodItem[];
     dashboardData: DashboardResponse | null;
+    onHistoryItemClick?: (item: any) => void;
 }
 
 // Circular Macro Widget
@@ -58,7 +59,7 @@ const MacroCircle = ({ label, current, total, color, percent }: { label: string,
     );
 };
 
-export const SummaryDashboard = ({ user, dashboardData, onRefresh }: SummaryDashboardProps & { onRefresh?: () => void }) => {
+export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItemClick }: SummaryDashboardProps & { onRefresh?: () => void }) => {
     const [showEditGoals, setShowEditGoals] = useState(false);
     const [showNutridex, setShowNutridex] = useState(false);
 
@@ -139,6 +140,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh }: SummaryDash
                 consumed={dashboardData?.macro_rings?.calories?.consumed || 0}
                 limit={dashboardData?.macro_rings?.calories?.limit || 2000}
                 log={dashboardData?.history || []} // Use real history from API
+                onItemClick={onHistoryItemClick}
             />
         );
     }

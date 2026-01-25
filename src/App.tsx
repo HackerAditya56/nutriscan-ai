@@ -239,6 +239,35 @@ function App() {
     );
   }
 
+  const handleHistoryItemClick = (item: any) => {
+    // Convert history item to FoodItem format for AnalysisResults
+    const mappedItem: FoodItem = {
+      name: item.food,
+      calories: item.calories || 0,
+      // Use history macros if available, otherwise default
+      protein: item.macros?.p || 0,
+      sugar: item.macros?.s || 0,
+      fiber: item.macros?.c ? Math.round(item.macros.c / 5) : 0, // Estimate or omit if not in history
+      // Note: We don't have sub-ingredients or full details, so we fill what we can
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000', // Placeholder or add image URL to backend history
+      type: 'SAFE', // Default or infer from tags
+      message: "Historical entry.",
+      subtitle: item.time ? new Date(item.time).toLocaleString() : '',
+      risks: [],
+      swaps: [],
+      summaryGrid: [
+        { label: 'CALORIES', value: String(item.calories || 0), emoji: '🔥', color: 'orange' },
+        { label: 'PROTEIN', value: String(item.macros?.p || 0) + 'g', emoji: '💪', color: 'green' },
+        { label: 'CARBS', value: String(item.macros?.c || 0) + 'g', emoji: '🍞', color: 'blue' },
+        { label: 'FAT', value: String(item.macros?.f || 0) + 'g', emoji: '🥑', color: 'yellow' },
+      ],
+      tags: item.tags
+    };
+
+    setLastScan(mappedItem);
+    setActiveTab('results');
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
@@ -248,11 +277,13 @@ function App() {
             foodLog={foodLog}
             dashboardData={dashboardData}
             onRefresh={handleSplashReady}
+            onHistoryItemClick={handleHistoryItemClick}
           />
         );
       case 'scanner':
         return <Scanner onScanComplete={handleScanComplete} />;
       case 'results':
+        // If viewing history, logging might be disabled or hidden
         return <AnalysisResults item={lastScan} onLog={handleLogFood} onRetake={() => setActiveTab('scanner')} />;
       case 'profile':
         return (
@@ -283,6 +314,7 @@ function App() {
             foodLog={foodLog}
             dashboardData={dashboardData}
             onRefresh={handleSplashReady}
+            onHistoryItemClick={handleHistoryItemClick}
           />
         );
     }

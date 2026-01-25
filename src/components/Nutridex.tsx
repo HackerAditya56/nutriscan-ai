@@ -10,9 +10,10 @@ interface NutridexProps {
     consumed: number;
     limit: number;
     log: any[]; // Replace with FoodItem type if available
+    onItemClick?: (item: any) => void;
 }
 
-export const Nutridex = ({ onBack, consumed, limit, log }: NutridexProps) => {
+export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: NutridexProps) => {
     const [view, setView] = useState<'today' | 'week' | 'month'>('today');
 
     return (
@@ -63,10 +64,22 @@ export const Nutridex = ({ onBack, consumed, limit, log }: NutridexProps) => {
                     <div className="space-y-3">
                         {log.length > 0 ? (
                             log.map((item, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
+                                <div
+                                    key={i}
+                                    onClick={() => onItemClick ? onItemClick(item) : null} // Handle click
+                                    className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50 active:scale-[0.98] transition-transform cursor-pointer hover:bg-zinc-800/80"
+                                >
                                     <div>
-                                        <p className="font-bold text-white">{item.name}</p>
-                                        <p className="text-xs text-zinc-500">{new Date(item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <p className="font-bold text-white">{item.food || item.name}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <p className="text-xs text-zinc-500">{new Date(item.time || item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                            {/* Optional Tags */}
+                                            {item.tags && item.tags.length > 0 && (
+                                                <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-md uppercase tracking-wide truncate max-w-[80px]">
+                                                    {item.tags[0]}
+                                                </span>
+                                            )}
+                                        </div>
 
                                         {/* Rich History: Macro Badges */}
                                         {item.macros && (

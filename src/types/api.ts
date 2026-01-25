@@ -174,11 +174,12 @@ export interface DashboardResponse {
         time: string;
         food: string;
         calories?: number;
+        tags?: string[]; // New: Tags like "High Protein", "Spicy"
         macros?: {
             p: number; // Protein
             c: number; // Carbs
             f: number; // Fat
-            s?: number; // Sugar (Optional)
+            s?: number; // Sugar
         };
     }>;
 }
