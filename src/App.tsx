@@ -78,8 +78,7 @@ function App() {
     // Fallback logic: check scanResult -> ai_analysis -> default
     const foodName = scanResult.food_name || response.ui_cards?.ai_analysis?.item_name || "Unknown Food";
     console.log("Determined Food Name:", foodName, "Fallback Logic Triggered Check");
-    console.log("📲 PHONE RECEIVED JSON:", JSON.stringify(response.data, null, 2)); // <--- ADD THIS
-
+    
     // Map backend response to frontend FoodItem format
     const mappedItem: FoodItem = {
       name: foodName,
