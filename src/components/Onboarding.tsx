@@ -470,12 +470,27 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                         <div className="space-y-6">
                             {isInitializing ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                        className="w-24 h-24 rounded-full border-4 border-zinc-800 border-t-emerald-500 mb-8"
-                                    />
-                                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500">
+                                    <div className="relative">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl"
+                                        />
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                            className="w-24 h-24 rounded-full border-2 border-zinc-800 border-t-emerald-500 border-r-emerald-500/50"
+                                        />
+                                        <motion.div
+                                            animate={{ rotate: -180 }}
+                                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                            className="absolute inset-2 rounded-full border-2 border-zinc-800 border-b-emerald-400 border-l-emerald-400/30"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Scan size={32} className="text-emerald-500" />
+                                        </div>
+                                    </div>
+                                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500 mt-8">
                                         Initializing Brain...
                                     </h2>
                                     <p className="text-zinc-500 mt-2">Encrypting health profiles</p>

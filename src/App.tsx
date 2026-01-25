@@ -54,12 +54,20 @@ function App() {
     const micros = response.micronutrients || scanResult.micronutrients || {};
 
     // Helper to extract numeric value from multiple keys case-insensitively
+    // Updated to strictly handle numbers and prevent string parsing errors
     const getVal = (...keys: string[]) => {
       for (const key of keys) {
-        if (macros[key] !== undefined) return parseFloat(String(macros[key])) || 0;
-        if (micros[key] !== undefined) return parseFloat(String(micros[key])) || 0;
-        // Also check scanResult root for calories
-        if (scanResult[key] !== undefined) return parseFloat(String(scanResult[key])) || 0;
+        // 1. Check macros
+        if (typeof macros[key] === 'number') return macros[key];
+        if (macros[key] !== undefined && !isNaN(parseFloat(String(macros[key])))) return parseFloat(String(macros[key]));
+
+        // 2. Check micros
+        if (typeof micros[key] === 'number') return micros[key];
+        if (micros[key] !== undefined && !isNaN(parseFloat(String(micros[key])))) return parseFloat(String(micros[key]));
+
+        // 3. Check scanResult root
+        if (typeof scanResult[key] === 'number') return scanResult[key];
+        if (scanResult[key] !== undefined && !isNaN(parseFloat(String(scanResult[key])))) return parseFloat(String(scanResult[key]));
       }
       return 0;
     };
@@ -67,9 +75,14 @@ function App() {
     const safeTruth = response.ui_cards?.truth || { status: 'safe', title: 'Scanned', subtitle: 'Analyzing...', risks: [] };
     const safeSwaps = response.ui_cards?.swaps || [];
 
+    // Fallback logic: check scanResult -> ai_analysis -> default
+    const foodName = scanResult.food_name || response.ui_cards?.ai_analysis?.item_name || "Unknown Food";
+    console.log("Determined Food Name:", foodName, "Fallback Logic Triggered Check");
+    console.log("📲 PHONE RECEIVED JSON:", JSON.stringify(response.data, null, 2)); // <--- ADD THIS
+
     // Map backend response to frontend FoodItem format
     const mappedItem: FoodItem = {
-      name: scanResult.food_name || "Unknown Food",
+      name: foodName,
       calories: getVal('Calories', 'calories'),
       sugar: getVal('Sugar', 'sugar'), // Sugar is often in micronutrients or top level
       fiber: getVal('Fiber', 'fiber'),
