@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { ChevronLeft, BarChart3, TrendingUp, PieChart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, BarChart3, TrendingUp, PieChart, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card } from './ui/Card';
 import { cn } from '../lib/utils';
 // import { HISTORY_DATA } from '../constants'; // Use if needed
+import { imageStore } from '../services/imageStore';
 
 interface NutridexProps {
     onBack: () => void;
@@ -15,6 +16,57 @@ interface NutridexProps {
 
 export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: NutridexProps) => {
     const [view, setView] = useState<'today' | 'week' | 'month'>('today');
+    const [imageMap, setImageMap] = useState<Record<string, string>>({});
+    const [loadedImages, setLoadedImages] = useState<Record<string, string>>({});
+
+    // Load Image Map on Mount
+    useEffect(() => {
+        const mapStr = localStorage.getItem('food_image_map');
+        if (mapStr) {
+            setImageMap(JSON.parse(mapStr));
+        }
+    }, []);
+
+    // Fetch images when log or map changes
+    useEffect(() => {
+        const loadImages = async () => {
+            const newImages: Record<string, string> = {};
+            for (const item of log) {
+                if (item.time && imageMap[item.time] && !loadedImages[item.time]) {
+                    try {
+                        const imgData = await imageStore.getImage(imageMap[item.time]);
+                        if (imgData) {
+                            newImages[item.time] = imgData;
+                        }
+                    } catch (e) {
+                        console.error("Failed to load image for", item.time, e);
+                    }
+                }
+            }
+            if (Object.keys(newImages).length > 0) {
+                setLoadedImages(prev => ({ ...prev, ...newImages }));
+            }
+        };
+
+        if (log.length > 0 && Object.keys(imageMap).length > 0) {
+            loadImages();
+        }
+    }, [log, imageMap]);
+
+    // Enhanced Click Handler
+    const handleItemClick = (item: any) => {
+        if (!onItemClick) return;
+
+        // Reconstruct visual details
+        const reconstructedItem = {
+            ...item,
+            image: loadedImages[item.time] || null, // Pass the real image if we have it
+            // Reconstruct type/status based on tags
+            type: item.tags?.includes('DANGER') || item.tags?.includes('High Sugar') ? 'WARNING' : 'SAFE'
+        };
+
+        onItemClick(reconstructedItem);
+    }
 
     return (
         <div className="min-h-screen bg-black text-white p-6 pt-10 pb-24">
@@ -66,35 +118,48 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                             log.map((item, i) => (
                                 <div
                                     key={i}
-                                    onClick={() => onItemClick ? onItemClick(item) : null} // Handle click
+                                    onClick={() => handleItemClick(item)} // Handle click using enhanced handler
                                     className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50 active:scale-[0.98] transition-transform cursor-pointer hover:bg-zinc-800/80"
                                 >
-                                    <div>
-                                        <p className="font-bold text-white">{item.food || item.name}</p>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <p className="text-xs text-zinc-500">{new Date(item.time || item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                            {/* Optional Tags */}
-                                            {item.tags && item.tags.length > 0 && (
-                                                <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-md uppercase tracking-wide truncate max-w-[80px]">
-                                                    {item.tags[0]}
-                                                </span>
+                                    <div className="flex items-center gap-4">
+                                        {/* Image Thumbnail */}
+                                        <div className="w-12 h-12 rounded-xl bg-zinc-800 overflow-hidden flex-shrink-0 border border-zinc-700">
+                                            {loadedImages[item.time] ? (
+                                                <img src={loadedImages[item.time]} className="w-full h-full object-cover" alt="Food" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-zinc-600">
+                                                    <ImageIcon size={16} />
+                                                </div>
                                             )}
                                         </div>
 
-                                        {/* Rich History: Macro Badges */}
-                                        {item.macros && (
-                                            <div className="flex gap-2 mt-2">
-                                                <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                                                    P: {item.macros.p}g
-                                                </span>
-                                                <span className="text-[10px] font-bold bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded border border-blue-500/20">
-                                                    C: {item.macros.c}g
-                                                </span>
-                                                <span className="text-[10px] font-bold bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">
-                                                    F: {item.macros.f}g
-                                                </span>
+                                        <div>
+                                            <p className="font-bold text-white">{item.food || item.name}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-xs text-zinc-500">{new Date(item.time || item.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                {/* Optional Tags */}
+                                                {item.tags && item.tags.length > 0 && (
+                                                    <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-md uppercase tracking-wide truncate max-w-[80px]">
+                                                        {item.tags[0]}
+                                                    </span>
+                                                )}
                                             </div>
-                                        )}
+
+                                            {/* Rich History: Macro Badges */}
+                                            {item.macros && (
+                                                <div className="flex gap-2 mt-2">
+                                                    <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                                        P: {item.macros.p}g
+                                                    </span>
+                                                    <span className="text-[10px] font-bold bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                                        C: {item.macros.c}g
+                                                    </span>
+                                                    <span className="text-[10px] font-bold bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                                        F: {item.macros.f}g
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="font-bold text-white">{item.calories}</p>

@@ -119,14 +119,39 @@ function App() {
     if (!userId) return;
 
     try {
+      // 1. Save Image Locally (IndexedDB)
+      let localImageId = null;
+      if (lastScan && lastScan.image && lastScan.image.startsWith('data:image')) {
+        const { imageStore } = await import('./services/imageStore');
+        localImageId = await imageStore.saveImage(lastScan.image);
+        console.log("Image saved locally with ID:", localImageId);
+      }
+
+      // 2. Log to Backend
       await api.logFood({
         user_id: userId,
         food_data: lastScanResult
       });
 
-      // Refresh dashboard
+      // 3. Refresh Dashboard & Map Image
       const data = await api.getDashboard(userId);
       setDashboardData(data);
+
+      // Mapping Logic: Find the most recent history item that matches our food name/time
+      // Since backend generates the time, we take the top item or find close match
+      if (data.history && data.history.length > 0 && localImageId) {
+        const latestItem = data.history[0]; // Assuming backend returns sorted desc
+        // Safer: search for item with matching food name within last minute
+        // But top item is usually correct.
+
+        if (latestItem) {
+          const mapStr = localStorage.getItem('food_image_map');
+          const map = mapStr ? JSON.parse(mapStr) : {};
+          map[latestItem.time] = localImageId; // Map backend timestamp to local ID
+          localStorage.setItem('food_image_map', JSON.stringify(map));
+          console.log("Mapped history item", latestItem.time, "to image", localImageId);
+        }
+      }
 
       // Go to home to see updated rings
       setActiveTab('home');

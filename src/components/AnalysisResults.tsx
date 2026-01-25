@@ -73,7 +73,13 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
             <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                     <div className="relative">
-                        <img src={item.image} className="w-16 h-16 rounded-full border-2 border-zinc-800 object-cover" alt="Scan" />
+                        {item.image ? (
+                            <img src={item.image} className="w-16 h-16 rounded-full border-2 border-zinc-800 object-cover" alt="Scan" />
+                        ) : (
+                            <div className="w-16 h-16 rounded-full border-2 border-zinc-800 bg-zinc-800 flex items-center justify-center">
+                                <Flame size={24} className="text-zinc-600" />
+                            </div>
+                        )}
                         <div className="absolute -bottom-1 -right-1 bg-zinc-900 p-1 rounded-full border border-zinc-800">
                             {/* Original image icon if provided */}
                         </div>
