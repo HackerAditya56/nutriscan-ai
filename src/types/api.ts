@@ -97,11 +97,20 @@ export interface SwapCard {
     reason: string;
 }
 
+export interface HealthAlertCard {
+    status: 'SAFE' | 'DANGER' | 'WARNING';
+    color_code: string;
+    title: string;
+    subtitle: string;
+    icon: string;
+}
+
 export interface UICards {
     truth: TruthCard;
     fun_summary: string;
     ai_analysis?: string;
     swaps: SwapCard[];
+    health_alert?: HealthAlertCard;
 }
 
 export interface ScanResponse {
@@ -112,6 +121,7 @@ export interface ScanResponse {
         fun_summary: string;
         ai_analysis?: string;
         swaps: string[]; // Updated to string array
+        health_alert?: HealthAlertCard;
     };
     user_state: {
         daily_progress: {

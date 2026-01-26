@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronLeft, Upload, Scan, ChevronRight, Plus,
-    Check, ShieldCheck, User, AlertCircle, Pencil, X
+    Check, AlertCircle, X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
@@ -51,7 +51,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
     });
     const [profileBlob, setProfileBlob] = useState<AIFindings | null>(null);
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 4));
+    const nextStep = () => setStep(s => Math.min(s + 1, 3));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
     const updateData = (key: keyof OnboardingProfile, value: any) => {
@@ -84,15 +84,13 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
             // Store the AI findings for later confirmation
             setProfileBlob(response.ai_findings);
 
-            // Auto-populate conditions from AI findings
+            // Auto-populate conditions from AI findings (Merge with existing)
             if (response.ai_findings.conditions) {
-                updateData('conditions', response.ai_findings.conditions);
+                const uniqueConditions = new Set([...data.conditions, ...response.ai_findings.conditions]);
+                updateData('conditions', Array.from(uniqueConditions));
             }
 
             setIsProcessing(false);
-            // Move to next step (Food Preferences)
-            // Or maybe stay here and show results? User said "when user go to another step then post".
-            // Typically "Analyze" implies processing. I'll move to next step after analysis.
             nextStep();
         } catch (error) {
             console.error('Onboarding error:', error);
@@ -100,7 +98,6 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
             setIsProcessing(false);
         }
     };
-
     const toggleCondition = (condition: string) => {
         const current = data.conditions;
         if (current.includes(condition)) {
@@ -140,6 +137,9 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                 gender: data.gender, // Now M/F
                 weight_kg: safeWeight,
                 height_cm: safeHeight,
+                // Robustness: Add legacy keys just in case backend mapping needs them inside the blob too
+                ...({ weight: safeWeight, height: safeHeight } as any),
+
                 bmi: bmi, // Added BMI
                 conditions: data.conditions,
                 allergies: data.allergies,
@@ -167,7 +167,10 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                 age: safeAge,
                 gender: data.gender,
                 weight: safeWeight,
-                height: safeHeight
+                height: safeHeight,
+                // Extra redunduncy for mobile issue
+                weight_kg: safeWeight,
+                height_cm: safeHeight
             };
 
             await api.confirmProfile(payload);
@@ -176,10 +179,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
             localStorage.setItem('userId', userId);
             localStorage.setItem('onboardingCompleted', 'true');
 
-            // Simulate initialization animation
-            setTimeout(() => {
-                onComplete();
-            }, 3000);
+            onComplete();
         } catch (error) {
             console.error('Profile confirmation error:', error);
             alert('Failed to save profile. Please try again.');
@@ -202,7 +202,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     >
                         <ChevronLeft size={20} />
                     </button>
-                    <span className="text-sm font-bold tracking-wider text-emerald-500">STEP {step}/4</span>
+                    <span className="text-sm font-bold tracking-wider text-emerald-500">STEP {step}/3</span>
                     <button
                         onClick={onComplete} // Skip for dev
                         className="text-xs text-zinc-600 font-medium hover:text-zinc-400"
@@ -214,7 +214,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     <motion.div
                         className="h-full bg-emerald-500"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(step / 4) * 100}%` }}
+                        animate={{ width: `${(step / 3) * 100}%` }}
                     />
                 </div>
             </div>
@@ -284,6 +284,15 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                                             type="number"
                                             value={data.weight}
                                             onChange={(e) => updateData('weight', parseInt(e.target.value))}
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-xl font-bold outline-none focus:border-emerald-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-zinc-400 block mb-2">Height <span className="text-xs text-zinc-600">(cm)</span></label>
+                                        <input
+                                            type="number"
+                                            value={data.height}
+                                            onChange={(e) => updateData('height', parseInt(e.target.value))}
                                             className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-xl font-bold outline-none focus:border-emerald-500 transition-colors"
                                         />
                                     </div>
@@ -480,110 +489,6 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                             </div>
                         </div>
                     )}
-
-                    {/* Step 4: Review */}
-                    {step === 4 && (
-                        <div className="space-y-6">
-                            {isInitializing ? (
-                                <div className="fixed inset-0 flex flex-col items-center justify-center z-50 bg-black">
-                                    <div className="relative">
-                                        <motion.div
-                                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                            className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl"
-                                        />
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }} // Slower, smoother rotation
-                                            className="w-24 h-24 rounded-full border-2 border-zinc-800 border-t-emerald-500 border-r-emerald-500/50"
-                                        />
-                                        <motion.div
-                                            animate={{ rotate: -360 }}
-                                            transition={{ duration: 12, repeat: Infinity, ease: "linear" }} // Counter rotation
-                                            className="absolute inset-2 rounded-full border-2 border-zinc-800 border-b-emerald-400 border-l-emerald-400/30"
-                                        />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <Scan size={32} className="text-emerald-500" />
-                                        </div>
-                                    </div>
-                                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500 mt-8">
-                                        Initializing Brain...
-                                    </h2>
-                                    <p className="text-zinc-500 mt-2">Encrypting health profiles</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <h1 className="text-3xl font-bold">Review Profile</h1>
-
-                                    <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-3xl border border-zinc-800">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">
-                                                    <User size={32} />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-white">{data.name || 'Guest User'}</h3>
-                                                    <p className="text-zinc-500">{data.age} years • {data.gender}</p>
-                                                </div>
-                                            </div>
-                                            <button onClick={() => setStep(1)} className="p-2 text-zinc-500 hover:text-emerald-500 transition-colors">
-                                                <Pencil size={18} />
-                                            </button>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
-                                                <span className="text-zinc-500">BMI Factor</span>
-                                                <span className="font-mono text-white">
-                                                    {(data.weight / Math.pow(data.height / 100, 2)).toFixed(1)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
-                                                <div>
-                                                    <span className="text-zinc-500 block">Water TDS</span>
-                                                    <span className="text-[10px] text-zinc-600">Mg/L (Optional)</span>
-                                                </div>
-                                                <input
-                                                    type="number"
-                                                    value={data.waterTDS || ''}
-                                                    placeholder="150"
-                                                    onChange={(e) => updateData('waterTDS', parseInt(e.target.value))}
-                                                    className="w-20 bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-right font-mono text-white outline-none focus:border-emerald-500 transition-colors"
-                                                />
-                                            </div>
-                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
-                                                <span className="text-zinc-500">Conditions</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-white font-medium text-right">
-                                                        {data.conditions.length > 0 ? data.conditions.join(', ') : 'None'}
-                                                    </span>
-                                                    <button onClick={() => setStep(2)} className="text-zinc-600 hover:text-emerald-500">
-                                                        <Pencil size={14} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between items-center py-3">
-                                                <span className="text-zinc-500">Diet</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-emerald-500 font-bold">{data.diet}</span>
-                                                    <button onClick={() => setStep(3)} className="text-zinc-600 hover:text-emerald-500">
-                                                        <Pencil size={14} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 p-4 bg-emerald-900/10 rounded-2xl border border-emerald-500/20">
-                                        <ShieldCheck size={24} className="text-emerald-500" />
-                                        <p className="text-xs text-emerald-200">
-                                            Your health data is <span className="font-bold">End-to-End Encrypted</span> and stored locally.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
                 </motion.div>
             </AnimatePresence>
 
@@ -600,10 +505,10 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                             </Button>
                         )}
                         <Button
-                            onClick={step === 4 ? handleInitialize : nextStep}
+                            onClick={step === 3 ? handleInitialize : nextStep}
                             className="flex-1 h-14 text-lg rounded-2xl bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
                         >
-                            {step === 4 ? 'Initialize Medical Brain' : 'Continue'}
+                            {step === 3 ? 'Finish & Initialize' : 'Continue'}
                         </Button>
                     </div>
 
