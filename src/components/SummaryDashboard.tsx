@@ -101,7 +101,8 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
             const curr = dates[i];
             const next = dates[i + 1];
             const diffTime = Math.abs(curr.getTime() - next.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // Use Math.round to handle DST shifts (23h or 25h diffs)
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
                 streak++;
@@ -121,12 +122,32 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         { day: 'S', status: 'pending' },
         { day: 'S', status: 'pending' },
     ];
-    // Simple logic to check off days based on actual history logs
+
+    // Logic: Only show ticks for THIS week (Mon-Sun relative to current date)
     if (dashboardData?.history) {
-        const loggedDayIndices = new Set(dashboardData.history.map(h => {
-            const d = new Date(h.time || Date.now()).getDay(); // 0 is Sunday
-            return d === 0 ? 6 : d - 1; // Map to 0-6 (Mon-Sun) if array starts Monday
-        }));
+        const now = new Date();
+        const dayOfWeek = now.getDay(); // 0 (Sun) to 6 (Sat)
+        // Calculate start of week (Monday)
+        // If Sunday (0), go back 6 days. If Mon (1), go back 0 days.
+        const diff = now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(diff);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        const loggedDayIndices = new Set<number>();
+
+        dashboardData.history.forEach(h => {
+            const d = new Date(h.time || Date.now());
+            if (d >= startOfWeek && d <= endOfWeek) {
+                const dayIndex = d.getDay(); // 0-6
+                const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // 0=Mon, 6=Sun
+                loggedDayIndices.add(mappedIndex);
+            }
+        });
 
         weekDays.forEach((d, idx) => {
             if (loggedDayIndices.has(idx)) d.status = 'checked';
