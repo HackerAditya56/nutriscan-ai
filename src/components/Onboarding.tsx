@@ -51,7 +51,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
     });
     const [profileBlob, setProfileBlob] = useState<AIFindings | null>(null);
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 3));
+    const nextStep = () => setStep(s => Math.min(s + 1, 4));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
     const updateData = (key: keyof OnboardingProfile, value: any) => {
@@ -202,7 +202,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     >
                         <ChevronLeft size={20} />
                     </button>
-                    <span className="text-sm font-bold tracking-wider text-emerald-500">STEP {step}/3</span>
+                    <span className="text-sm font-bold tracking-wider text-emerald-500">STEP {step}/4</span>
                     <button
                         onClick={onComplete} // Skip for dev
                         className="text-xs text-zinc-600 font-medium hover:text-zinc-400"
@@ -214,7 +214,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     <motion.div
                         className="h-full bg-emerald-500"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(step / 3) * 100}%` }}
+                        animate={{ width: `${(step / 4) * 100}%` }}
                     />
                 </div>
             </div>
@@ -231,6 +231,13 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     {step === 1 && (
                         <div className="space-y-6">
                             <h1 className="text-3xl font-bold">Let's get to know you.</h1>
+                            {/* ... Content skipped for brevity by tool logic, but I'm rewriting the container structure anyway if needed. 
+                                Actually, I am only replacing the changed parts. 
+                                I need to jump to Step 3 end and add Step 4.
+                            */}
+                            {/* ... Rest of Step 1 ... */}
+                            {/* ... */}
+                            {/* I will use a larger block to cover the structure changes accurately */}
 
                             <div className="space-y-4">
                                 <div>
@@ -489,10 +496,93 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                             </div>
                         </div>
                     )}
+
+                    {/* Step 4: Review */}
+                    {step === 4 && (
+                        <div className="space-y-6">
+                            {isInitializing ? (
+                                <div className="fixed inset-0 flex flex-col items-center justify-center z-50 bg-black">
+                                    <div className="relative">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl"
+                                        />
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                                            className="w-24 h-24 rounded-full border-2 border-zinc-800 border-t-emerald-500 border-r-emerald-500/50"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Scan size={32} className="text-emerald-500" />
+                                        </div>
+                                    </div>
+                                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500 mt-8">
+                                        Initializing Brain...
+                                    </h2>
+                                    <p className="text-zinc-500 mt-2">Encrypting health profiles</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <h1 className="text-3xl font-bold">Review Profile</h1>
+
+                                    <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-3xl border border-zinc-800">
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
+                                                <span className="text-zinc-500">BMI Factor</span>
+                                                <span className="font-mono text-white">
+                                                    {(data.weight / Math.pow(data.height / 100, 2)).toFixed(1)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
+                                                <div>
+                                                    <span className="text-zinc-500 block">Water TDS</span>
+                                                    <span className="text-[10px] text-zinc-600">Mg/L (Optional)</span>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    value={data.waterTDS || ''}
+                                                    placeholder="150"
+                                                    onChange={(e) => updateData('waterTDS', parseInt(e.target.value))}
+                                                    className="w-20 bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-right font-mono text-white outline-none focus:border-emerald-500 transition-colors"
+                                                />
+                                            </div>
+                                            <div className="flex justify-between items-center py-3 border-b border-zinc-800/50">
+                                                <span className="text-zinc-500">Conditions</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white font-medium text-right">
+                                                        {data.conditions.length > 0 ? data.conditions.join(', ') : 'None'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center py-3">
+                                                <span className="text-zinc-500">Diet</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-emerald-500 font-bold">{data.diet}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {profileBlob?.summary && (
+                                        <div className="bg-emerald-900/10 p-5 rounded-2xl border border-emerald-500/20">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Scan size={18} className="text-emerald-500" />
+                                                <span className="text-emerald-500 font-bold text-xs uppercase tracking-wider">AI Analysis</span>
+                                            </div>
+                                            <p className="text-zinc-300 text-sm leading-relaxed italic">
+                                                "{profileBlob.summary}"
+                                            </p>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </motion.div>
             </AnimatePresence>
 
-            {/* Bottom Buttons */}
+            {/* Bottom Buttons - Updated for 4 steps */}
             {!isInitializing && (
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-black z-20 flex flex-col gap-3">
                     <div className="flex gap-3">
@@ -505,10 +595,10 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                             </Button>
                         )}
                         <Button
-                            onClick={step === 3 ? handleInitialize : nextStep}
+                            onClick={step === 4 ? handleInitialize : nextStep}
                             className="flex-1 h-14 text-lg rounded-2xl bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
                         >
-                            {step === 3 ? 'Finish & Initialize' : 'Continue'}
+                            {step === 4 ? 'Initialize Medical Brain' : 'Continue'}
                         </Button>
                     </div>
 

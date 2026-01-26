@@ -4,7 +4,7 @@ import type { FoodItem } from '../constants';
 import { Button } from './ui/Button';
 import { motion } from 'framer-motion';
 import {
-    RefreshCw, Flame, Zap, Activity, Dumbbell, Leaf, AlertTriangle, HelpCircle, Sparkles, AlertOctagon, ThumbsUp, ThumbsDown, X, Check
+    RefreshCw, Flame, Zap, Activity, Dumbbell, Leaf, AlertTriangle, HelpCircle, Sparkles, AlertOctagon, ThumbsUp, ThumbsDown, X, Check, ShieldCheck
 } from 'lucide-react';
 import { api } from '../services/api';
 import { cn } from '../lib/utils';
@@ -68,11 +68,7 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
 
     // Extract Health Verdict for new Card
     // Safely verify if scan_result exists on item (it might be mapped in App.tsx)
-    const verdict = (item as any).scan_result?.verdict || (item as any).verdict;
-    const healthImplication = (item as any).scan_result?.health_implication || (item as any).health_implication;
-
-    const isBad = verdict === 'BAD';
-    const isGood = verdict === 'GOOD';
+    // const verdict = (item as any).scan_result?.verdict || (item as any).verdict;
 
     return (
         <div className="min-h-screen bg-black text-white p-6 pt-10 pb-28 relative">
@@ -133,44 +129,55 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
                 </div>
             </div>
 
-            {/* NEW: Health Impact Card */}
-            {(healthImplication) && (
-                <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                        "rounded-2xl p-5 mb-6 border relative overflow-hidden shadow-xl",
-                        isBad ? "bg-gradient-to-br from-rose-950/80 to-black border-rose-900/50" :
-                            isGood ? "bg-gradient-to-br from-emerald-950/80 to-black border-emerald-900/50" :
-                                "bg-zinc-900 border-zinc-800"
-                    )}
-                >
-                    {/* Glow effect */}
-                    <div className={cn("absolute top-0 right-0 w-40 h-40 blur-3xl rounded-full pointer-events-none opacity-20",
-                        isBad ? "bg-rose-600" : isGood ? "bg-emerald-600" : "bg-zinc-600"
-                    )}></div>
+            {/* NEW: Health Alert Card (Dynamic from Backend) */}
+            {((item as any).scan_result?.ui_cards?.health_alert) && (() => {
+                const alert = (item as any).scan_result.ui_cards.health_alert;
+                // Map Icon string to Component
+                const IconComponent = alert.status === 'DANGER' ? AlertTriangle :
+                    alert.status === 'SAFE' ? ThumbsUp :
+                        alert.icon === 'Shield' ? ShieldCheck : Activity;
 
-                    <div className="flex items-start gap-3 relative z-10">
-                        <div className={cn("p-2 rounded-xl shrink-0",
-                            isBad ? "bg-rose-500/20 text-rose-500 animate-pulse" :
-                                isGood ? "bg-emerald-500/20 text-emerald-500" : "bg-zinc-800 text-zinc-400"
-                        )}>
-                            {isBad ? <AlertTriangle size={20} fill="currentColor" fillOpacity={0.2} /> :
-                                isGood ? <Check size={20} /> : <Activity size={20} />}
+                return (
+                    <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl p-5 mb-6 border relative overflow-hidden shadow-xl"
+                        style={{
+                            backgroundColor: `${alert.color_code}10`, // 10% opacity
+                            borderColor: `${alert.color_code}40`      // 40% opacity
+                        }}
+                    >
+                        {/* Glow effect */}
+                        <div
+                            className="absolute top-0 right-0 w-40 h-40 blur-3xl rounded-full pointer-events-none opacity-20"
+                            style={{ backgroundColor: alert.color_code }}
+                        />
+
+                        <div className="flex items-start gap-3 relative z-10">
+                            <div
+                                className="p-2 rounded-xl shrink-0"
+                                style={{
+                                    backgroundColor: `${alert.color_code}20`,
+                                    color: alert.color_code
+                                }}
+                            >
+                                <IconComponent size={24} />
+                            </div>
+                            <div>
+                                <h3
+                                    className="text-xs font-black uppercase tracking-widest mb-1.5"
+                                    style={{ color: alert.color_code }}
+                                >
+                                    {alert.title}
+                                </h3>
+                                <p className="text-white font-bold leading-snug text-lg">
+                                    {alert.subtitle}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className={cn("text-xs font-black uppercase tracking-widest mb-1.5",
-                                isBad ? "text-rose-400" : isGood ? "text-emerald-400" : "text-zinc-400"
-                            )}>
-                                LONG TERM IMPACT
-                            </h3>
-                            <p className="text-white font-bold leading-snug">
-                                {healthImplication}
-                            </p>
-                        </div>
-                    </div>
-                </motion.div>
-            )}
+                    </motion.div>
+                );
+            })()}
 
             {/* UNKNOWN FOOD RETAKE FLOW */}
             {item.name === "Unknown Food" || item.name === "Scan Failed" ? (
