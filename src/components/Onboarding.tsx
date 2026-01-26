@@ -478,12 +478,12 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                                         />
                                         <motion.div
                                             animate={{ rotate: 360 }}
-                                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }} // Slower, smoother rotation
                                             className="w-24 h-24 rounded-full border-2 border-zinc-800 border-t-emerald-500 border-r-emerald-500/50"
                                         />
                                         <motion.div
-                                            animate={{ rotate: -180 }}
-                                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                            animate={{ rotate: -360 }}
+                                            transition={{ duration: 12, repeat: Infinity, ease: "linear" }} // Counter rotation
                                             className="absolute inset-2 rounded-full border-2 border-zinc-800 border-b-emerald-400 border-l-emerald-400/30"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center">

@@ -4,7 +4,7 @@ import type { FoodItem } from '../constants';
 import { Button } from './ui/Button';
 import { motion } from 'framer-motion';
 import {
-    RefreshCw, Flame, Zap, Activity, Dumbbell, Leaf, AlertTriangle, HelpCircle, Sparkles, AlertOctagon, ThumbsUp, ThumbsDown, X
+    RefreshCw, Flame, Zap, Activity, Dumbbell, Leaf, AlertTriangle, HelpCircle, Sparkles, AlertOctagon, ThumbsUp, ThumbsDown, X, Check
 } from 'lucide-react';
 import { api } from '../services/api';
 import { cn } from '../lib/utils';;
@@ -70,76 +70,84 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
     return (
         <div className="min-h-screen bg-black text-white p-6 pt-10 pb-28 relative">
             {/* Header Identity */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex flex-col gap-4 mb-6">
+                {/* Image and Status Group */}
                 <div className="flex items-center gap-4">
-                    <div className="relative">
+                    <div className="relative shrink-0">
+                        {/* Bigger Image to fix ratio issues */}
                         {item.image ? (
-                            <img src={item.image} className="w-16 h-16 rounded-full border-2 border-zinc-800 object-cover" alt="Scan" />
+                            <img src={item.image} className="w-24 h-24 rounded-2xl border-2 border-zinc-800 object-cover shadow-2xl" alt="Scan" />
                         ) : (
-                            <div className="w-16 h-16 rounded-full border-2 border-zinc-800 bg-zinc-800 flex items-center justify-center">
-                                <Flame size={24} className="text-zinc-600" />
+                            <div className="w-24 h-24 rounded-2xl border-2 border-zinc-800 bg-zinc-800 flex items-center justify-center">
+                                <Flame size={32} className="text-zinc-600" />
                             </div>
                         )}
-                        <div className="absolute -bottom-1 -right-1 bg-zinc-900 p-1 rounded-full border border-zinc-800">
-                            {/* Original image icon if provided */}
+                        <div className="absolute -bottom-2 -right-2 bg-black p-1.5 rounded-full border border-zinc-800">
+                            {/* Status Icon Overlay */}
+                            {isError ? <AlertTriangle size={14} className="text-amber-500" /> : <Check size={14} className="text-emerald-500" />}
                         </div>
                     </div>
-                </div>
-                <div>
-                    <p className={cn("text-xs font-bold uppercase tracking-wider mb-0.5", isError ? "text-amber-500" : "text-zinc-500")}>
-                        {isError ? "ATTENTION" : "SCANNED"}
-                    </p>
-                    <h1 className="text-3xl font-bold text-white leading-tight">{item.name}</h1>
 
-                    {/* Verification Loop - Thumbs Up/Down */}
-                    {!isError && verificationStatus === 'idle' && (
-                        <div className="flex items-center gap-3 mt-2">
-                            <span className="text-[10px] text-zinc-500 font-medium">Did I get this right?</span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleVerifyParams(true)}
-                                    className="p-1.5 bg-zinc-800 rounded-full hover:bg-emerald-500/20 hover:text-emerald-500 transition-colors text-zinc-400"
-                                >
-                                    <ThumbsUp size={14} />
-                                </button>
-                                <button
-                                    onClick={() => setShowCorrectionModal(true)}
-                                    className="p-1.5 bg-zinc-800 rounded-full hover:bg-rose-500/20 hover:text-rose-500 transition-colors text-zinc-400"
-                                >
-                                    <ThumbsDown size={14} />
-                                </button>
+                    <div className="flex-1 min-w-0">
+                        <p className={cn("text-xs font-bold uppercase tracking-wider mb-1", isError ? "text-amber-500" : "text-zinc-500")}>
+                            {isError ? "ATTENTION" : "SCANNED"}
+                        </p>
+                        {/* Dynamic Text Size based on length */}
+                        <h1 className={cn("font-bold text-white leading-tight break-words",
+                            item.name.length > 20 ? "text-2xl" : "text-3xl"
+                        )}>
+                            {item.name}
+                        </h1>
+
+                        {/* Verification Loop - Thumbs Up/Down - Moved here for better integration */}
+                        {!isError && verificationStatus === 'idle' && (
+                            <div className="flex items-center gap-3 mt-2">
+                                <span className="text-[10px] text-zinc-500 font-medium">Did I get this right?</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleVerifyParams(true)}
+                                        className="p-1.5 bg-zinc-800 rounded-full hover:bg-emerald-500/20 hover:text-emerald-500 transition-colors text-zinc-400"
+                                    >
+                                        <ThumbsUp size={14} />
+                                    </button>
+                                    <button
+                                        onClick={() => setShowCorrectionModal(true)}
+                                        className="p-1.5 bg-zinc-800 rounded-full hover:bg-rose-500/20 hover:text-rose-500 transition-colors text-zinc-400"
+                                    >
+                                        <ThumbsDown size={14} />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {verificationStatus === 'success' && (
-                        <p className="text-[10px] text-emerald-500 font-bold mt-2 animate-pulse">Thanks! I learned that.</p>
-                    )}
-
-
-                    {/* UNKNOWN FOOD RETAKE FLOW */}
-                    {item.name === "Unknown Food" || item.name === "Scan Failed" ? (
-                        <div className="mt-4">
-                            <Button
-                                onClick={onRetake}
-                                className="bg-white text-black font-bold py-3 px-8 rounded-full shadow-xl active:scale-95 transition-transform flex items-center gap-2"
-                            >
-                                <RefreshCw size={18} /> Retake Photo
-                            </Button>
-                        </div>
-                    ) : !isError && (
-                        <div className="flex flex-col gap-3 mt-1">
-                            <span className="text-xs font-bold text-emerald-500">{item.calories} Kcal</span>
-                            <Button
-                                onClick={handleLog}
-                                disabled={isLogging}
-                                className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2 px-6 shadow-lg shadow-emerald-500/20 rounded-xl text-sm w-max"
-                            >
-                                {isLogging ? 'Saving...' : 'Track This Food'}
-                            </Button>
-                        </div>
-                    )}
+                        )}
+                        {verificationStatus === 'success' && (
+                            <p className="text-[10px] text-emerald-500 font-bold mt-2 animate-pulse">Thanks! I learned that.</p>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* UNKNOWN FOOD RETAKE FLOW */}
+            {item.name === "Unknown Food" || item.name === "Scan Failed" ? (
+                <div className="mt-4 mb-6">
+                    <Button
+                        onClick={onRetake}
+                        className="bg-white text-black font-bold py-3 px-8 rounded-full shadow-xl active:scale-95 transition-transform flex items-center gap-2"
+                    >
+                        <RefreshCw size={18} /> Retake Photo
+                    </Button>
+                </div>
+            ) : !isError && (
+                <div className="flex flex-col gap-3 mb-6">
+                    <Button
+                        onClick={handleLog}
+                        disabled={isLogging}
+                        className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 px-6 shadow-lg shadow-emerald-500/20 rounded-xl text-sm w-full flex items-center justify-center gap-2"
+                    >
+                        {isLogging ? 'Saving...' : 'Track This Food'}
+                    </Button>
+                </div>
+            )}
+
             {/* Tabs - Segmented Style */}
             <div className="flex bg-zinc-900 p-1 rounded-2xl mb-6">
                 <button

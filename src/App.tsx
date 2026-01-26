@@ -149,6 +149,15 @@ function App() {
           const map = mapStr ? JSON.parse(mapStr) : {};
           map[latestItem.time] = localImageId; // Map backend timestamp to local ID
           localStorage.setItem('food_image_map', JSON.stringify(map));
+
+          // Also store Swaps if available
+          if (lastScanResult.ui_cards?.swaps && lastScanResult.ui_cards.swaps.length > 0) {
+            const swapMapStr = localStorage.getItem('food_swaps_map');
+            const swapMap = swapMapStr ? JSON.parse(swapMapStr) : {};
+            swapMap[latestItem.time] = lastScanResult.ui_cards.swaps;
+            localStorage.setItem('food_swaps_map', JSON.stringify(swapMap));
+          }
+
           console.log("Mapped history item", latestItem.time, "to image", localImageId);
         }
       }

@@ -37,10 +37,17 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
             setIsLoading(true);
             const response: ProfileResponse = await api.getProfile(userId);
 
-            // Validation Helper
-            const cleanVal = (val: any) => (val === 0 || val === '0' || val === null) ? undefined : Number(val);
+            // Validation Helper: Ensure we never return NaN
+            const cleanVal = (val: any) => {
+                if (val === undefined || val === null || val === '') return undefined;
+                const num = Number(val);
+                return isNaN(num) ? undefined : num;
+            };
 
-            // Force update profile data
+            // CRITICAL: Log raw response for debugging
+            console.log("RAW PROFILE FETCH:", response, "Has Weight:", response.weight_kg);
+            if (response) console.log("Rendering Profile Data...");
+
             const summary = response.medical_summary || (response as any).profile?.friendly_summary || "No AI Summary generated yet.";
 
             setProfileData(prev => ({
@@ -224,7 +231,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             </div>
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Weight (kg)</label>
-                                <input type="number" value={weight ?? ''} onChange={(e) => setWeight(parseInt(e.target.value) || undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
+                                <input type="number" value={weight !== undefined ? weight : ''} onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
                             </div>
                         </div>
                         <div>
