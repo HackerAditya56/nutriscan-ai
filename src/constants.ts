@@ -45,6 +45,15 @@ export interface FoodItem {
     tags?: string[];
     aiAnalysis?: string;
     dailySugarPercent?: number; // New field for user progress
+
+    // New Fields
+    scan_result?: {
+        verdict?: string;
+        health_implication?: string;
+        summary_grid?: any[];
+    };
+    verdict?: string;
+    health_implication?: string;
 }
 
 export const USER_PROFILE: UserProfile = {

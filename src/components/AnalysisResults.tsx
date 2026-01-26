@@ -7,12 +7,13 @@ import {
     RefreshCw, Flame, Zap, Activity, Dumbbell, Leaf, AlertTriangle, HelpCircle, Sparkles, AlertOctagon, ThumbsUp, ThumbsDown, X, Check
 } from 'lucide-react';
 import { api } from '../services/api';
-import { cn } from '../lib/utils';;
+import { cn } from '../lib/utils';
 
 interface AnalysisResultsProps {
     item: FoodItem | null;
     onLog: () => void;
     onRetake?: () => void;
+    isHistoryView?: boolean;
 }
 
 // Nutrient Grid Card
@@ -29,9 +30,7 @@ const NutrientCard = ({ label, value, unit, icon: Icon, colorClass }: any) => (
     </div>
 );
 
-
-
-export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps) => {
+export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }: AnalysisResultsProps) => {
     if (!item) return null;
     const [activeTab, setActiveTab] = useState<'swaps' | 'nutrients' | 'summary'>('summary');
     const [isLogging, setIsLogging] = useState(false);
@@ -67,6 +66,14 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
 
     const isError = item.name === "Scan Failed" || item.message.toLowerCase().includes("not recognized");
 
+    // Extract Health Verdict for new Card
+    // Safely verify if scan_result exists on item (it might be mapped in App.tsx)
+    const verdict = (item as any).scan_result?.verdict || (item as any).verdict;
+    const healthImplication = (item as any).scan_result?.health_implication || (item as any).health_implication;
+
+    const isBad = verdict === 'BAD';
+    const isGood = verdict === 'GOOD';
+
     return (
         <div className="min-h-screen bg-black text-white p-6 pt-10 pb-28 relative">
             {/* Header Identity */}
@@ -100,7 +107,7 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
                         </h1>
 
                         {/* Verification Loop - Thumbs Up/Down - Moved here for better integration */}
-                        {!isError && verificationStatus === 'idle' && (
+                        {!isError && verificationStatus === 'idle' && !isHistoryView && (
                             <div className="flex items-center gap-3 mt-2">
                                 <span className="text-[10px] text-zinc-500 font-medium">Did I get this right?</span>
                                 <div className="flex gap-2">
@@ -126,6 +133,45 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
                 </div>
             </div>
 
+            {/* NEW: Health Impact Card */}
+            {(healthImplication) && (
+                <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                        "rounded-2xl p-5 mb-6 border relative overflow-hidden shadow-xl",
+                        isBad ? "bg-gradient-to-br from-rose-950/80 to-black border-rose-900/50" :
+                            isGood ? "bg-gradient-to-br from-emerald-950/80 to-black border-emerald-900/50" :
+                                "bg-zinc-900 border-zinc-800"
+                    )}
+                >
+                    {/* Glow effect */}
+                    <div className={cn("absolute top-0 right-0 w-40 h-40 blur-3xl rounded-full pointer-events-none opacity-20",
+                        isBad ? "bg-rose-600" : isGood ? "bg-emerald-600" : "bg-zinc-600"
+                    )}></div>
+
+                    <div className="flex items-start gap-3 relative z-10">
+                        <div className={cn("p-2 rounded-xl shrink-0",
+                            isBad ? "bg-rose-500/20 text-rose-500 animate-pulse" :
+                                isGood ? "bg-emerald-500/20 text-emerald-500" : "bg-zinc-800 text-zinc-400"
+                        )}>
+                            {isBad ? <AlertTriangle size={20} fill="currentColor" fillOpacity={0.2} /> :
+                                isGood ? <Check size={20} /> : <Activity size={20} />}
+                        </div>
+                        <div>
+                            <h3 className={cn("text-xs font-black uppercase tracking-widest mb-1.5",
+                                isBad ? "text-rose-400" : isGood ? "text-emerald-400" : "text-zinc-400"
+                            )}>
+                                LONG TERM IMPACT
+                            </h3>
+                            <p className="text-white font-bold leading-snug">
+                                {healthImplication}
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
             {/* UNKNOWN FOOD RETAKE FLOW */}
             {item.name === "Unknown Food" || item.name === "Scan Failed" ? (
                 <div className="mt-4 mb-6">
@@ -136,7 +182,7 @@ export const AnalysisResults = ({ item, onLog, onRetake }: AnalysisResultsProps)
                         <RefreshCw size={18} /> Retake Photo
                     </Button>
                 </div>
-            ) : !isError && (
+            ) : (!isError && !isHistoryView) && (
                 <div className="flex flex-col gap-3 mb-6">
                     <Button
                         onClick={handleLog}

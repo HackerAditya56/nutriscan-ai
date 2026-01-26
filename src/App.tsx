@@ -295,7 +295,13 @@ function App() {
         { label: 'CARBS', value: String(item.macros?.c || 0) + 'g', emoji: '🍞', color: 'blue' },
         { label: 'FAT', value: String(item.macros?.f || 0) + 'g', emoji: '🥑', color: 'yellow' },
       ],
-      tags: item.tags
+      tags: item.tags,
+      // Pass through verdict info if available in history item (using explicit or fallback logic)
+      scan_result: {
+        verdict: item.verdict || item.scan_result?.verdict,
+        health_implication: item.health_implication || item.scan_result?.health_implication,
+        summary_grid: item.summary_grid || [] // ensure grid is passed if available
+      }
     };
 
     setLastScan(mappedItem);
@@ -318,7 +324,14 @@ function App() {
         return <Scanner onScanComplete={handleScanComplete} />;
       case 'results':
         // If viewing history, logging might be disabled or hidden
-        return <AnalysisResults item={lastScan} onLog={handleLogFood} onRetake={() => setActiveTab('scanner')} />;
+        // Simple heuristic: if we clicked a history item recently, it's history view. 
+        // Best way is to assume if lastScan has a 'time' property that is old, but we just set lastScan.
+        // Let's rely on the fact that if we are in 'results' but NOT from a fresh scan event immediately (which sets lastScanResult).
+        // Actually, handleHistoryItemClick sets lastScan. Fresh scan does too.
+        // We can check if lastScanResult matches lastScan? No.
+        // Let's just track it via state ideally, but for now, we can check if the mapped item has "Historical entry".
+        const isHistory = lastScan?.message === "Historical entry.";
+        return <AnalysisResults item={lastScan} onLog={handleLogFood} onRetake={() => setActiveTab('scanner')} isHistoryView={isHistory} />;
       case 'profile':
         return (
           <Profile

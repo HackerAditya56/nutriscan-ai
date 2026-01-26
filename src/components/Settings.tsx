@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, User2, Activity, Droplets, Heart, X } from 'lucide-react';
+import { ArrowLeft, User2, Activity, Droplets, Heart, X, RefreshCcw } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { api } from '../services/api';
@@ -88,15 +88,12 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         }
     };
 
-    // ... existing handleSave ...
-
     const handleSave = async () => {
         if (!profileData) return;
 
         try {
             setIsSaving(true);
 
-            // ... existing save logic ...
             // Build AIFindings structure for update
             const updatedProfile: AIFindings = {
                 age: age || 0,
@@ -133,8 +130,6 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         }
     };
 
-    // ... existing handleNewUser ...
-
     const handleNewUser = () => {
         localStorage.removeItem('onboardingCompleted');
         window.location.reload();
@@ -148,7 +143,6 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         );
     }
 
-    // ... existing notFound and !profileData checks ...
     if (notFound) {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-6">
@@ -182,7 +176,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
 
     return (
         <div className="min-h-screen bg-black text-white pb-24">
-            {/* ... Header ... */}
+            {/* Header */}
             <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-lg border-b border-white/5">
                 <div className="flex items-center justify-between p-6">
                     <button onClick={onBack} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
@@ -212,7 +206,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                         <h2 className="text-lg font-bold">Personal Information</h2>
                     </div>
                     <Card className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs text-zinc-400 block mb-2">Age</label>
                                 <input type="number" value={age ?? ''} onChange={(e) => setAge(parseInt(e.target.value) || undefined)} placeholder="Not Set" className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-emerald-500 placeholder:text-zinc-600" />
@@ -303,11 +297,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                     </Card>
                 </section>
 
-                {/* ... existing sections ... */}
-                {/* Re-insert sections that were skipped in summary */}
-                {/* Actually I should rely on replace keeping surrounding or careful edit */}
-
-                {/* Safe Rendering for Arrays */}
+                {/* Medical Summary */}
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <Heart size={20} className="text-emerald-500" />
@@ -328,7 +318,6 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             </div>
                         )}
 
-                        {/* Allergies */}
                         {/* Allergies */}
                         <div>
                             <label className="text-xs text-zinc-400 block mb-2">Allergies</label>
@@ -376,8 +365,6 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             </div>
                         </div>
 
-                        {/* AI Summary - REMOVED LEGACY, using Medical Summary */}
-
                         {/* Allergy Guide */}
                         {profileData.verified_allergy_guide && (
                             <div>
@@ -389,14 +376,45 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                         )}
 
                         {/* Medical Summary (New) */}
-                        {profileData.medical_summary && (
+                        {true && ( // Always show section frame if summary might exist
                             <div>
-                                <label className="text-xs text-zinc-400 block mb-2">Medical Report Summary</label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="text-xs text-zinc-400">Medical Report Summary</label>
+                                    <button onClick={async () => {
+                                        // Refresh Logic
+                                        try {
+                                            alert("Asking AI to re-evaluate your profile...");
+                                            // Construct minimal adequate request or full current state
+                                            await api.confirmProfile({
+                                                user_id: userId,
+                                                name: profileData.name || "User",
+                                                activity_level: activityLevel,
+                                                profile: {
+                                                    ...profileData,
+                                                    age: age || profileData.age || 0,
+                                                    gender: gender || profileData.gender,
+                                                    height_cm: height || profileData.height_cm || 0,
+                                                    weight_kg: weight || profileData.weight_kg || 0,
+                                                } as any // Cast to satisfy strict type if needed, or rely on ProfileResponse matching AIFindings partially
+                                            });
+                                            await loadProfile();
+                                        } catch (e) { alert("Failed to refresh."); }
+                                    }} className="text-zinc-500 hover:text-white transition-colors">
+                                        <RefreshCcw size={14} />
+                                    </button>
+                                </div>
                                 <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                                    <p className="text-sm text-blue-200 leading-relaxed">{profileData.medical_summary}</p>
+                                    <p className="text-sm text-blue-200 leading-relaxed">
+                                        {profileData.medical_summary || (profileData as any).profile?.friendly_summary || "No summary available yet. Tap refresh."}
+                                    </p>
                                 </div>
                             </div>
                         )}
+
+                        {/* Mobile ID Footer */}
+                        <div className="mt-8 pt-6 border-t border-zinc-900 text-center">
+                            <p className="text-[10px] text-zinc-600 font-mono">User ID: {userId}</p>
+                        </div>
 
                         {/* Activity Inference (New) */}
                         {profileData.activity_level_inference && (
