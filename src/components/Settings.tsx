@@ -44,6 +44,14 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                 return isNaN(num) ? undefined : num;
             };
 
+            const cleanGender = (g?: string) => {
+                if (!g) return 'M';
+                const lower = g.toLowerCase();
+                if (lower === 'male' || lower === 'm') return 'M';
+                if (lower === 'female' || lower === 'f') return 'F';
+                return 'Other';
+            };
+
             // CRITICAL: Log raw response for debugging
             console.log("RAW PROFILE FETCH:", response, "Has Weight:", response.weight_kg);
             if (response) console.log("Rendering Profile Data...");
@@ -62,7 +70,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
 
             // Map standard keys with fallbacks
             if (response.age !== undefined) setAge(cleanVal(response.age));
-            if (response.gender) setGender(response.gender);
+            setGender(cleanGender(response.gender)); // Robust mapping
 
             // Robust check for height/weight
             setHeight(cleanVal(response.height_cm !== undefined ? response.height_cm : response.height));

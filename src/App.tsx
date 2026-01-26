@@ -186,9 +186,10 @@ function App() {
         const fullProfile: UserProfile = {
           name: profileData.name || 'User',
           age: profileData.age || 0,
-          gender: profileData.gender || 'M',
-          height: profileData.height_cm || 0,
-          weight: profileData.weight_kg || 0,
+          gender: (profileData.gender && (profileData.gender.toLowerCase() === 'female' || profileData.gender.toLowerCase() === 'f')) ? 'F' : 'M',
+          // Robust mapping for height/weight matching Settings.tsx logic
+          height: profileData.height_cm || profileData.height || 0,
+          weight: profileData.weight_kg || profileData.weight || 0,
           conditions: profileData.conditions || [],
           medical_summary: profileData.medical_summary,
           activity_level_inference: profileData.activity_level_inference
