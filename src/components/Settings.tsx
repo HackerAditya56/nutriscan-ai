@@ -413,7 +413,19 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
 
                         {/* Mobile ID Footer */}
                         <div className="mt-8 pt-6 border-t border-zinc-900 text-center">
-                            <p className="text-[10px] text-zinc-600 font-mono">User ID: {userId}</p>
+                            <p className="text-[10px] text-zinc-600 font-mono mb-2">User ID: {userId}</p>
+                            <button
+                                onClick={() => {
+                                    const newId = prompt("Enter User ID to switch to:", userId);
+                                    if (newId && newId !== userId) {
+                                        localStorage.setItem('userId', newId.trim());
+                                        window.location.reload();
+                                    }
+                                }}
+                                className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider hover:underline"
+                            >
+                                Switch Account
+                            </button>
                         </div>
 
                         {/* Activity Inference (New) */}

@@ -13,7 +13,7 @@ import type { OnboardResponse, AIFindings } from '../types/api';
 interface OnboardingProfile {
     name: string;
     age: number;
-    gender: 'Male' | 'Female' | 'Other';
+    gender: 'M' | 'F' | 'Other'; // Updated from Male/Female
     height: number; // cm
     weight: number; // kg
     activityLevel: number; // 1-5
@@ -27,7 +27,7 @@ interface OnboardingProfile {
 const INITIAL_DATA: OnboardingProfile = {
     name: '',
     age: 28,
-    gender: 'Male',
+    gender: 'M',
     height: 175,
     weight: 70,
     activityLevel: 3,
@@ -131,11 +131,15 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
 
             // Create fallback profile if no medical report was uploaded
             // IMPORTANT: Ensure structure matches what backend expects for "profile" field
+            const safeAge = isNaN(data.age) ? 25 : data.age;
+            const safeWeight = isNaN(data.weight) ? 70 : data.weight;
+            const safeHeight = isNaN(data.height) ? 170 : data.height;
+
             const finalProfile: AIFindings = profileBlob || {
-                age: data.age,
-                gender: data.gender,
-                weight_kg: data.weight,
-                height_cm: data.height,
+                age: safeAge,
+                gender: data.gender, // Now M/F
+                weight_kg: safeWeight,
+                height_cm: safeHeight,
                 bmi: bmi, // Added BMI
                 conditions: data.conditions,
                 allergies: data.allergies,
@@ -149,7 +153,8 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                 }
             };
 
-            await api.confirmProfile({
+            // Payload with redundant root fields for fail-safety
+            const payload: any = {
                 user_id: userId,
                 name: data.name,
                 profile: finalProfile,
@@ -157,8 +162,15 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                 activity_level: activityLevel,
                 dietary_preferences: {
                     type: data.diet
-                }
-            });
+                },
+                // Redundant Root Fields for Backend robustness
+                age: safeAge,
+                gender: data.gender,
+                weight: safeWeight,
+                height: safeHeight
+            };
+
+            await api.confirmProfile(payload);
 
             // Save userId to localStorage
             localStorage.setItem('userId', userId);
@@ -235,18 +247,22 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                                 <div>
                                     <label className="text-sm text-zinc-400 block mb-2">Gender</label>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {['Male', 'Female', 'Other'].map((g) => (
+                                        {[
+                                            { label: 'Male', value: 'M' },
+                                            { label: 'Female', value: 'F' },
+                                            { label: 'Other', value: 'Other' }
+                                        ].map((g) => (
                                             <button
-                                                key={g}
-                                                onClick={() => updateData('gender', g)}
+                                                key={g.value}
+                                                onClick={() => updateData('gender', g.value)}
                                                 className={cn(
                                                     "py-3 rounded-2xl border font-medium transition-all",
-                                                    data.gender === g
+                                                    data.gender === g.value
                                                         ? "bg-emerald-500 text-black border-emerald-500"
                                                         : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800"
                                                 )}
                                             >
-                                                {g}
+                                                {g.label}
                                             </button>
                                         ))}
                                     </div>
@@ -573,21 +589,39 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
 
             {/* Bottom Buttons */}
             {!isInitializing && (
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-black z-20 flex gap-3">
-                    {step > 1 && (
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-black z-20 flex flex-col gap-3">
+                    <div className="flex gap-3">
+                        {step > 1 && (
+                            <Button
+                                onClick={prevStep}
+                                className="flex-1 h-14 text-lg rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700"
+                            >
+                                Back
+                            </Button>
+                        )}
                         <Button
-                            onClick={prevStep}
-                            className="flex-1 h-14 text-lg rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700"
+                            onClick={step === 4 ? handleInitialize : nextStep}
+                            className="flex-1 h-14 text-lg rounded-2xl bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
                         >
-                            Back
+                            {step === 4 ? 'Initialize Medical Brain' : 'Continue'}
                         </Button>
+                    </div>
+
+                    {step === 1 && (
+                        <button
+                            onClick={() => {
+                                const existingId = prompt("Enter your User ID from your other device:");
+                                if (existingId && existingId.trim().length > 10) {
+                                    localStorage.setItem('userId', existingId.trim());
+                                    localStorage.setItem('onboardingCompleted', 'true');
+                                    window.location.reload();
+                                }
+                            }}
+                            className="text-zinc-500 text-sm font-medium hover:text-white transition-colors py-2"
+                        >
+                            Already have an account? <span className="underline decoration-zinc-700">Recover Profile</span>
+                        </button>
                     )}
-                    <Button
-                        onClick={step === 4 ? handleInitialize : nextStep}
-                        className="flex-1 h-14 text-lg rounded-2xl bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
-                    >
-                        {step === 4 ? 'Initialize Medical Brain' : 'Continue'}
-                    </Button>
                 </div>
             )}
         </div>
