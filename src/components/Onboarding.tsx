@@ -469,7 +469,7 @@ export const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
                     {step === 4 && (
                         <div className="space-y-6">
                             {isInitializing ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
+                                <div className="fixed inset-0 flex flex-col items-center justify-center z-50 bg-black">
                                     <div className="relative">
                                         <motion.div
                                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}

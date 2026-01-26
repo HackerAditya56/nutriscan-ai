@@ -37,34 +37,35 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
             setIsLoading(true);
             const response: ProfileResponse = await api.getProfile(userId);
 
-            // CRITICAL: Log raw response for debugging
-            console.log("RAW PROFILE:", response);
+            // Validation Helper
+            const cleanVal = (val: any) => (val === 0 || val === '0' || val === null) ? undefined : Number(val);
 
-            // Force update profile data, ensuring we overwrite any defaults
+            // Force update profile data
+            const summary = response.medical_summary || (response as any).profile?.friendly_summary || "No AI Summary generated yet.";
+
             setProfileData(prev => ({
                 ...(prev || {}),
                 ...response,
-                // Ensure name and specific fields are captured
                 name: response.name || (prev?.name) || "User",
                 recommended_limits: response.recommended_limits || prev?.recommended_limits,
-                // Preserve condition/allergy arrays if present
                 conditions: response.conditions || [],
-                allergies: response.allergies || []
+                allergies: response.allergies || [],
+                medical_summary: summary
             } as ProfileResponse));
 
-            // Update local editable state with values from backend
-            // Only fall back to defaults if the value is strictly undefined/null
-            if (response.age !== undefined) setAge(response.age);
+            // Map standard keys with fallbacks
+            if (response.age !== undefined) setAge(cleanVal(response.age));
             if (response.gender) setGender(response.gender);
-            if (response.height_cm !== undefined) setHeight(response.height_cm);
-            if (response.weight_kg !== undefined) setWeight(response.weight_kg);
-            if (response.water_tds !== undefined) setWaterTDS(response.water_tds);
+
+            // Robust check for height/weight
+            setHeight(cleanVal(response.height_cm !== undefined ? response.height_cm : response.height));
+            setWeight(cleanVal(response.weight_kg !== undefined ? response.weight_kg : response.weight));
+            setWaterTDS(cleanVal(response.water_tds));
 
             // Handle nested or mapped fields
             const diet = response.dietary_preferences?.type || response.dietary_type;
             if (diet) setDietaryType(diet);
 
-            // Compatibility: activity_level is now strictly string in ProfileResponse
             if (response.activity_level) setActivityLevel(response.activity_level);
 
             setAllergies(response.allergies || []);
@@ -80,12 +81,15 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         }
     };
 
+    // ... existing handleSave ...
+
     const handleSave = async () => {
         if (!profileData) return;
 
         try {
             setIsSaving(true);
 
+            // ... existing save logic ...
             // Build AIFindings structure for update
             const updatedProfile: AIFindings = {
                 age: age || 0,
@@ -122,6 +126,8 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         }
     };
 
+    // ... existing handleNewUser ...
+
     const handleNewUser = () => {
         localStorage.removeItem('onboardingCompleted');
         window.location.reload();
@@ -135,6 +141,7 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
         );
     }
 
+    // ... existing notFound and !profileData checks ...
     if (notFound) {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-6">
@@ -192,13 +199,11 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
 
             <div className="p-6 space-y-6 max-w-2xl mx-auto">
                 {/* Personal Information */}
-                {/* ... existing fields ... */}
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <User2 size={20} className="text-emerald-500" />
                         <h2 className="text-lg font-bold">Personal Information</h2>
                     </div>
-                    {/* ... Same inputs ... */}
                     <Card className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -233,6 +238,22 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                     </Card>
                 </section>
 
+                {/* AI Health Context (Read-Only) */}
+                <section>
+                    <div className="flex items-center gap-2 mb-4">
+                        <Activity size={20} className="text-emerald-500" />
+                        <h2 className="text-lg font-bold">AI Health Context (Read-Only)</h2>
+                    </div>
+                    <Card className="space-y-4">
+                        <div className="p-4 bg-zinc-900 border-l-4 border-emerald-500 rounded-r-xl">
+                            <p className="text-sm text-zinc-300 font-mono leading-relaxed">
+                                {profileData.medical_summary}
+                            </p>
+                        </div>
+                    </Card>
+                </section>
+
+
                 {/* Activity Level */}
                 <section>
                     <div className="flex items-center gap-2 mb-4">
@@ -251,29 +272,6 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             <option value="active">Active (exercise 6-7 days/week)</option>
                             <option value="athlete">Athlete (intense training)</option>
                         </select>
-                    </Card>
-                </section>
-
-                {/* Medical Summary - NEW */}
-                <section>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Heart size={20} className="text-emerald-500" />
-                        <h2 className="text-lg font-bold">Medical Summary</h2>
-                    </div>
-                    <Card className="space-y-4">
-                        {/* AI Summary Display */}
-                        {profileData.medical_summary ? (
-                            <div className="p-4 bg-emerald-900/10 rounded-xl border border-emerald-500/20">
-                                <label className="text-xs text-emerald-500 font-bold uppercase tracking-widest mb-2 block flex items-center gap-2">
-                                    <Activity size={12} /> AI Analysis
-                                </label>
-                                <p className="text-sm text-emerald-100/90 leading-relaxed font-medium">
-                                    "{profileData.medical_summary}"
-                                </p>
-                            </div>
-                        ) : (
-                            <p className="text-sm text-zinc-500 italic">No medical summary available.</p>
-                        )}
                     </Card>
                 </section>
 

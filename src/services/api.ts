@@ -27,7 +27,7 @@ class ApiService {
 
         this.client = axios.create({
             baseURL: this.baseUrl,
-            timeout: 330000, // 120s for heavy AI operations
+            timeout: 300000, // 120s for heavy AI operations
             headers: {
                 'Content-Type': 'application/json',
                 'ngrok-skip-browser-warning': 'true', // Required for ngrok free tier
@@ -52,7 +52,7 @@ class ApiService {
         localStorage.setItem('apiBaseUrl', url);
         this.client = axios.create({
             baseURL: url,
-            timeout: 120000,
+            timeout: 300000,
             headers: {
                 'Content-Type': 'application/json',
                 'ngrok-skip-browser-warning': 'true', // Required for ngrok free tier

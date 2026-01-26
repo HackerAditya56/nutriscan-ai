@@ -231,6 +231,9 @@ export interface ProfileResponse {
     // Restoring fields used by Settings
     water_tds?: number;
     activity_level?: string;
+    // Legacy fields for robust mapping
+    weight?: number;
+    height?: number;
 }
 
 export interface UpdateProfileRequest {
