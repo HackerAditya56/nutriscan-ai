@@ -59,7 +59,7 @@ NutriScan AI is an intelligent nutrition tracking application that leverages com
 
 ### 🧠 **AI Analysis Engine**
 - **RAG-Enhanced**: Uses retrieval-augmented generation for medical context
-- **Multi-Model Backend**: Hybrid vision architecture (Qwen2.5-VL + PaliGemma2 + MedGemma)
+- **Multi-Model Backend**: Hybrid vision architecture (Qwen2.5-VL-7B for nutrition labels + Qwen2.5-VL-3B for fresh food + MedGemma)
 - **Personalized Insights**: Analysis considers user's health profile
 - **Smart Fallbacks**: Switches between label reading and dish estimation automatically
 
@@ -80,8 +80,8 @@ NutriScan AI is an intelligent nutrition tracking application that leverages com
 
 ### **Backend** (Python - Ngrok Tunnel)
 - **Vision Models**:
-  - Qwen/Qwen2.5-VL-7B-Instruct (Label Reader)
-  - google/paligemma2-3b-mix-224 (Dish Estimator)
+  - Qwen/Qwen2.5-VL-7B-Instruct (Nutrition Label Scanner)
+  - Qwen/Qwen2.5-VL-3B-Instruct (Fresh Food Detection & Estimation)
   - google/medgemma-1.5-4b-it (Medical Analysis)
 - **RAG**: BAAI/bge-m3 embeddings
 - **Framework**: FastAPI (assumed based on endpoints)
@@ -405,19 +405,10 @@ This project is licensed under the MIT License. See `LICENSE` file for details.
 
 ## 🙏 Acknowledgments
 
-- **AI Models**: Qwen2.5-VL, PaliGemma2, MedGemma by Alibaba/Google
+- **AI Models**: Qwen2.5-VL, MedGemma by Alibaba/Google
 - **Icons**: Lucide React
 - **Animations**: Framer Motion
 - **Inspiration**: Modern nutrition apps like MyFitnessPal, Yazio
-
----
-
-## 📞 Support
-
-For issues or questions:
-- Open an issue on GitHub
-- Email: support@nutriscan.ai (if applicable)
-- Discord: [Your Server Link]
 
 ---
 
