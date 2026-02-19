@@ -12,11 +12,13 @@ import { Setup } from './components/Setup';
 import { LandingPage } from './components/LandingPage';
 import { Settings } from './components/Settings';
 import { ServerOffline } from './components/ServerOffline';
+import { ManualEntryFAB } from './components/ManualEntryFAB';
 import type { FoodItem } from './constants';
 import { LayoutGrid, Camera, User, Lightbulb, AlertOctagon } from 'lucide-react';
 import { cn } from './lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { api } from './services/api';
+import { imageStore } from './services/imageStore';
 import type { DashboardResponse, UserProfile } from './types/api';
 
 
@@ -34,6 +36,7 @@ function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
   const [lastScanResult, setLastScanResult] = useState<any | null>(null);
+  const [isManualLoading, setIsManualLoading] = useState(false);
 
   // Toggle Dark Mode
   useEffect(() => {
@@ -113,6 +116,26 @@ function App() {
     setActiveTab('results');
   };
 
+  const handleManualEntry = async (query: string) => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    setIsManualLoading(true);
+    try {
+      const response = await api.manualEntry({
+        user_id: userId,
+        query: query
+      });
+
+      handleScanComplete(response, undefined); // No image for manual entry
+    } catch (error) {
+      console.error("Manual entry failed:", error);
+      alert("Failed to analyze food text. Please try again.");
+    } finally {
+      setIsManualLoading(false);
+    }
+  };
+
   const handleLogFood = async () => {
     if (!lastScanResult) return;
     const userId = localStorage.getItem('userId');
@@ -122,7 +145,7 @@ function App() {
       // 1. Save Image Locally (IndexedDB)
       let localImageId = null;
       if (lastScan && lastScan.image && lastScan.image.startsWith('data:image')) {
-        const { imageStore } = await import('./services/imageStore');
+        // const { imageStore } = await import('./services/imageStore'); // Now static import
         localImageId = await imageStore.saveImage(lastScan.image);
         console.log("Image saved locally with ID:", localImageId);
       }
@@ -274,7 +297,27 @@ function App() {
     );
   }
 
-  const handleHistoryItemClick = (item: any) => {
+  const handleHistoryItemClick = async (item: any) => {
+    // Try to fetch image from local store
+    let imageSrc = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000'; // Default
+
+    try {
+      if (item.time) {
+        const mapStr = localStorage.getItem('food_image_map');
+        const map = mapStr ? JSON.parse(mapStr) : {};
+        const imageId = map[item.time];
+
+        if (imageId) {
+          const storedImage = await imageStore.getImage(imageId);
+          if (storedImage) {
+            imageSrc = storedImage;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching history image:", e);
+    }
+
     // Convert history item to FoodItem format for AnalysisResults
     const mappedItem: FoodItem = {
       name: item.food,
@@ -284,7 +327,7 @@ function App() {
       sugar: item.macros?.s || 0,
       fiber: item.macros?.c ? Math.round(item.macros.c / 5) : 0, // Estimate or omit if not in history
       // Note: We don't have sub-ingredients or full details, so we fill what we can
-      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000', // Placeholder or add image URL to backend history
+      image: imageSrc,
       type: 'SAFE', // Default or infer from tags
       message: "Historical entry.",
       subtitle: item.time ? new Date(item.time).toLocaleString() : '',
@@ -429,6 +472,11 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Global Manual Entry FAB */}
+      {activeTab !== 'onboard' && (
+        <ManualEntryFAB onSubmit={handleManualEntry} isLoading={isManualLoading} />
       )}
 
     </Layout>

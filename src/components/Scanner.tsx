@@ -309,6 +309,8 @@ export const Scanner = ({ onScanComplete }: ScannerProps) => {
                     </>
                 )}
 
+
+
                 {/* Status Pills */}
                 <div className="absolute top-6 w-full flex justify-center z-20 px-4">
                     <AnimatePresence>

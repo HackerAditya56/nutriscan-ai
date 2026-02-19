@@ -13,6 +13,7 @@ import type {
     PingResponse,
     VerifyScanRequest,
     VerifyScanResponse,
+    ManualEntryRequest,
 } from '../types/api';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -154,6 +155,14 @@ class ApiService {
      */
     async verifyScan(data: VerifyScanRequest): Promise<VerifyScanResponse> {
         const response = await this.client.post<VerifyScanResponse>('/verify', data);
+        return response.data;
+    }
+
+    /**
+     * Manual food entry by text
+     */
+    async manualEntry(data: ManualEntryRequest): Promise<ScanResponse> {
+        const response = await this.client.post<ScanResponse>('/manual-entry', data);
         return response.data;
     }
 }

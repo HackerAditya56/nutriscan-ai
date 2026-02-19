@@ -62,6 +62,11 @@ export interface ScanRequest {
     persona?: 'witty' | 'mom' | 'scientific';
 }
 
+export interface ManualEntryRequest {
+    user_id: string;
+    query: string;
+}
+
 export interface SummaryGridItem {
     emoji: string;
     label: string;
