@@ -69,9 +69,9 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
     // Use Real Data
     const calories = {
         current: dashboardData?.macro_rings?.calories?.consumed || 0,
-        total: dashboardData?.macro_rings?.calories?.limit || 2000
+        total: dashboardData?.macro_rings?.calories?.limit || user?.recommended_limits?.daily_calories || 2000
     };
-    const rawProgress = (calories.current / calories.total) * 100;
+    const rawProgress = calories.total > 0 ? (calories.current / calories.total) * 100 : 0;
     const progress = Number.isFinite(rawProgress) ? Math.min(rawProgress, 100) : 0;
 
     // Smart Streak Calculation
@@ -264,23 +264,23 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
                         <MacroCircle
                             label="PROTEIN"
                             current={dashboardData?.macro_rings?.protein?.consumed || 0}
-                            total={dashboardData?.macro_rings?.protein?.limit || 150}
-                            percent={dashboardData?.macro_rings?.protein ? (Number.isFinite((dashboardData.macro_rings.protein.consumed / dashboardData.macro_rings.protein.limit)) ? Math.round((dashboardData.macro_rings.protein.consumed / dashboardData.macro_rings.protein.limit) * 100) : 0) : 0}
-                            color="stroke-emerald-500" // Green
+                            total={dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 150}
+                            percent={(() => { const lim = dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 150; const con = dashboardData?.macro_rings?.protein?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
+                            color="stroke-emerald-500"
                         />
                         <MacroCircle
                             label="CARBS"
-                            current={dashboardData?.macro_rings?.sugar?.consumed || 0}
-                            total={dashboardData?.macro_rings?.sugar?.limit || 250}
-                            percent={dashboardData?.macro_rings?.sugar ? (Number.isFinite((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit)) ? Math.min(Math.round((dashboardData.macro_rings.sugar.consumed / dashboardData.macro_rings.sugar.limit) * 100), 100) : 0) : 0}
-                            color="stroke-amber-400" // Yellow
+                            current={dashboardData?.macro_rings?.carbs?.consumed || 0}
+                            total={dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 250}
+                            percent={(() => { const lim = dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 250; const con = dashboardData?.macro_rings?.carbs?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
+                            color="stroke-amber-400"
                         />
                         <MacroCircle
                             label="FAT"
                             current={dashboardData?.macro_rings?.fat?.consumed || 0}
-                            total={dashboardData?.macro_rings?.fat?.limit || 65}
-                            percent={dashboardData?.macro_rings?.fat ? (Number.isFinite((dashboardData.macro_rings.fat.consumed / dashboardData.macro_rings.fat.limit)) ? Math.round((dashboardData.macro_rings.fat.consumed / dashboardData.macro_rings.fat.limit) * 100) : 0) : 0}
-                            color="stroke-orange-600" // Dark Orange/Brown
+                            total={dashboardData?.macro_rings?.fat?.limit || user?.recommended_limits?.daily_fat_g || 65}
+                            percent={(() => { const lim = dashboardData?.macro_rings?.fat?.limit || user?.recommended_limits?.daily_fat_g || 65; const con = dashboardData?.macro_rings?.fat?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
+                            color="stroke-orange-600"
                         />
                     </div>
                 </div>

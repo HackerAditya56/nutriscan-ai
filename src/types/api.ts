@@ -17,6 +17,9 @@ export interface AIFindings {
     recommended_limits: {
         daily_calories: number;
         daily_sugar_g: number;
+        daily_protein_g?: number;
+        daily_carbs_g?: number;
+        daily_fat_g?: number;
         bmr?: number;
     };
 }
@@ -212,6 +215,9 @@ export interface UserProfile {
     recommended_limits?: {
         daily_calories: number;
         daily_sugar_g: number;
+        daily_protein_g?: number;
+        daily_carbs_g?: number;
+        daily_fat_g?: number;
         bmr?: number;
     };
     custom_goals?: {
@@ -232,6 +238,9 @@ export interface ProfileResponse {
     recommended_limits: {
         daily_calories: number;
         daily_sugar_g: number;
+        daily_protein_g?: number;
+        daily_carbs_g?: number;
+        daily_fat_g?: number;
     };
     // Additional optional fields that might come back
     gender?: string;
