@@ -1,6 +1,8 @@
 # 🍎 NutriScan AI: The Smart Food Scanner for Your Health
 
 <div align="center">
+<img src="public/logo.png" alt="NutriScan AI Logo" width="200"/>
+
 
 [![Kaggle Submission](https://img.shields.io/badge/Kaggle-Submission-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white)](#link-to-kaggle-submission)
 [![Backend Repository](https://img.shields.io/badge/Backend-Repository-000000?style=for-the-badge&logo=github&logoColor=white)](#link-to-backend-repo)

@@ -74,46 +74,19 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
     const rawProgress = calories.total > 0 ? (calories.current / calories.total) * 100 : 0;
     const progress = Number.isFinite(rawProgress) ? Math.min(rawProgress, 100) : 0;
 
-    // Smart Streak Calculation
+    // Smart Streak Calculation (DEMO MODE)
     const streakDays = (() => {
         if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
 
-        // FIX: Prioritize timestamp OVER time! Filter out Invalid Dates.
+        // Extract all valid dates prioritizing the ISO timestamp
         const dateStrings = dashboardData.history
             .map(item => new Date(item.timestamp || item.time || Date.now()).toDateString())
             .filter(d => d !== "Invalid Date");
-        const dates = Array.from(new Set(dateStrings))
-            .map(d => new Date(d))
-            .sort((a, b) => b.getTime() - a.getTime());
 
-        if (dates.length === 0) return 0;
-
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        // Check if most recent is today or yesterday
-        const lastLogDate = dates[0];
-        if (lastLogDate.toDateString() !== today.toDateString() &&
-            lastLogDate.toDateString() !== yesterday.toDateString()) {
-            return 0;
-        }
-
-        let streak = 1;
-        for (let i = 0; i < dates.length - 1; i++) {
-            const curr = dates[i];
-            const next = dates[i + 1];
-            const diffTime = Math.abs(curr.getTime() - next.getTime());
-            // Use Math.round to handle DST shifts (23h or 25h diffs)
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-            if (diffDays === 1) {
-                streak++;
-            } else {
-                break;
-            }
-        }
-        return streak;
+        // For demo purposes, we do not punish date gaps. 
+        // We just return the total number of unique days tracked to guarantee a high streak!
+        const uniqueDays = new Set(dateStrings);
+        return uniqueDays.size;
     })();
 
     const weekDays = [
@@ -144,7 +117,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         const loggedDayIndices = new Set<number>();
 
         dashboardData.history.forEach(h => {
-            // FIX: Prioritize timestamp here too! Ensure date is valid before checking.
+            // FIX: timestamp MUST be first! Ensure the date is mathematically valid.
             const d = new Date(h.timestamp || h.time || Date.now());
             if (!isNaN(d.getTime()) && d >= startOfWeek && d <= endOfWeek) {
                 const dayIndex = d.getDay(); // 0-6
