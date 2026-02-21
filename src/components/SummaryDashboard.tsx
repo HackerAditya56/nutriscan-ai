@@ -79,7 +79,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
 
         // Get unique dates sorted descending
-        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.time || Date.now()).toDateString())))
+        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.time || item.timestamp || Date.now()).toDateString())))
             .map(d => new Date(d))
             .sort((a, b) => b.getTime() - a.getTime());
 
@@ -141,7 +141,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         const loggedDayIndices = new Set<number>();
 
         dashboardData.history.forEach(h => {
-            const d = new Date(h.time || Date.now());
+            const d = new Date(h.time || h.timestamp || Date.now());
             if (d >= startOfWeek && d <= endOfWeek) {
                 const dayIndex = d.getDay(); // 0-6
                 const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // 0=Mon, 6=Sun

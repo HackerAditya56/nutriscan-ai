@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pencil, X, Zap, Sparkles, Loader2 } from 'lucide-react';
+import { Pencil, X, Zap, Sparkles } from 'lucide-react';
 
 interface ManualEntryFABProps {
     onSubmit: (query: string) => void;

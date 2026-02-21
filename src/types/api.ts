@@ -190,6 +190,7 @@ export interface DashboardResponse {
     };
     history: Array<{
         time: string;
+        timestamp?: string; // Fallback from some backend versions
         food: string;
         calories?: number;
         tags?: string[]; // New: Tags like "High Protein", "Spicy"
