@@ -110,11 +110,11 @@ function App() {
       comparison_note: scanResult.comparison_note, // Ensure this is passed
       tags: scanResult.vision_breakdown_list,
       aiAnalysis: response.ui_cards?.ai_analysis,
-      scan_result: scanResult  // Attach raw backend data for Long-Term Impact card
+      scan_result: response  // Attach raw backend data for Long-Term Impact card
     };
 
     setLastScan(mappedItem);
-    setLastScanResult(scanResult);
+    setLastScanResult(response);
     console.log('Processed Scan Item:', mappedItem);
     setActiveTab('results');
   };

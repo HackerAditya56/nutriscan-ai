@@ -66,9 +66,12 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
 
     const isError = item.name === "Scan Failed" || item.message.toLowerCase().includes("not recognized");
 
-    // Extract Health Verdict for new Card
-    // Safely verify if scan_result exists on item (it might be mapped in App.tsx)
-    // const verdict = (item as any).scan_result?.verdict || (item as any).verdict;
+    const scanData = (item as any).scan_result || {};
+    const uiCards = scanData.ui_cards || {};
+    const swaps = uiCards.swaps || scanData.swaps || item.swaps || [];
+    const aiAnalysisText = uiCards.fun_summary || uiCards.ai_analysis?.analysis || scanData.motivation || item.message || "Analysis complete.";
+
+    const healthAlert = uiCards.health_alert || scanData.ui_cards?.health_alert;
 
     return (
         <div className="min-h-screen bg-black text-white p-6 pt-10 pb-28 relative">
@@ -130,8 +133,8 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
             </div>
 
             {/* NEW: Health Alert Card (Dynamic from Backend) */}
-            {((item as any).scan_result?.ui_cards?.health_alert) && (() => {
-                const alert = (item as any).scan_result.ui_cards.health_alert;
+            {healthAlert && (() => {
+                const alert = healthAlert;
                 // Map Icon string to Component
                 const IconComponent = alert.status === 'DANGER' ? AlertTriangle :
                     alert.status === 'SAFE' ? ThumbsUp :
@@ -361,7 +364,7 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
                     {/* Enhanced AI Analysis & Long Term Impact */}
                     <div className="space-y-4 mt-6">
                         {/* 1. Standard AI Analysis */}
-                        {item.aiAnalysis && (
+                        {aiAnalysisText && (
                             <div className="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800 relative overflow-hidden">
                                 <div className="absolute top-0 left-0 p-2">
                                     <div className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-900/20">
@@ -369,20 +372,9 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
                                     </div>
                                 </div>
                                 <div className="pt-8 space-y-2">
-                                    {typeof item.aiAnalysis === 'object' ? (
-                                        <>
-                                            {item.aiAnalysis.item_name && (
-                                                <p className="text-white text-sm font-bold">{item.aiAnalysis.item_name}</p>
-                                            )}
-                                            <p className="text-zinc-300 text-sm leading-relaxed font-medium">
-                                                {item.aiAnalysis.analysis || 'Analysis complete.'}
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <p className="text-zinc-300 text-sm leading-relaxed font-medium">
-                                            {String(item.aiAnalysis)}
-                                        </p>
-                                    )}
+                                    <p className="text-zinc-300 text-sm leading-relaxed font-medium">
+                                        {aiAnalysisText}
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -477,9 +469,9 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
             {activeTab === 'swaps' && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                     <p className="text-zinc-400 text-sm font-medium">Healthier Alternatives</p>
-                    {item.swaps && item.swaps.length > 0 ? (
+                    {swaps && swaps.length > 0 ? (
                         <div className="flex flex-col gap-3 pb-4">
-                            {item.swaps.map((swapName, i) => (
+                            {swaps.map((swapName: string, i: number) => (
                                 <div key={i} className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50 flex items-start gap-4 active:scale-[0.98] transition-all h-auto min-h-[4.5rem]">
                                     {/* Icon Placeholder */}
                                     <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-1">
