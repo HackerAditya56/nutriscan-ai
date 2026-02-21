@@ -396,31 +396,7 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
                             </div>
                         )}
 
-                        {/* 3. Catch-All: Render any extra scan_result fields not already shown */}
-                        {(() => {
-                            const sr = (item as any).scan_result;
-                            if (!sr || typeof sr !== 'object') return null;
-                            const shownKeys = new Set(['verdict', 'health_implication', 'summary_grid', 'food_name', 'macros', 'tags', 'risks', 'swaps', 'ui_cards', 'vision_breakdown_list', 'comparison_note']);
-                            const extraEntries = Object.entries(sr).filter(
-                                ([key, val]) => !shownKeys.has(key) && val !== undefined && val !== null && val !== ''
-                            );
-                            if (extraEntries.length === 0) return null;
-                            return (
-                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50 space-y-3">
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">AI INSIGHTS</p>
-                                    {extraEntries.map(([key, val]) => (
-                                        <div key={key} className="flex flex-col gap-0.5">
-                                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
-                                                {key.replace(/_/g, ' ')}
-                                            </span>
-                                            <p className="text-zinc-300 text-sm font-medium leading-relaxed">
-                                                {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()}
+
                     </div>
                 </motion.div>
             )}
