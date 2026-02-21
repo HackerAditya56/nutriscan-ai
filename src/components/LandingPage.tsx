@@ -130,16 +130,16 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(300px,_auto)]">
                         {/* Big Bento 1 */}
-                        <div className="md:col-span-2 rounded-[2rem] bg-gradient-to-br from-zinc-900 to-black border border-white/5 p-8 relative overflow-hidden group">
+                        <div className="md:col-span-2 rounded-[2rem] bg-gradient-to-br from-[#0c1f15] to-black border border-emerald-500/20 p-8 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20 transition-transform group-hover:scale-150 duration-700" />
                             <div className="relative z-10 h-full flex flex-col justify-between">
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
-                                    <ScanLine className="text-emerald-400" size={28} />
+                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                                    <Brain className="text-emerald-400" size={32} />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold mb-3">Dual-Vision Scanning</h3>
-                                    <p className="text-zinc-400 text-lg leading-relaxed max-w-md">
-                                        Powered by Qwen2.5-VL-7B for dense nutrition tables and a custom NutriScan-3B adapter for fresh food visual estimation.
+                                    <h3 className="text-2xl sm:text-3xl font-black mb-3">Powered by <br /><span className="text-emerald-400 text-4xl sm:text-5xl mt-2 block">Med-Gemma 1.5-4b-it</span></h3>
+                                    <p className="text-emerald-100/70 text-lg leading-relaxed max-w-md">
+                                        Google's cutting-edge open weights medical LLM acts as the core "Health Specialist", dynamically correlating extracted macro data with your exact biometric conditions (like Diabetes or Asthma) for unparalleled, personalized health guidance.
                                     </p>
                                 </div>
                             </div>
@@ -148,11 +148,11 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
                         {/* Standard Bento 2 */}
                         <div className="rounded-[2rem] bg-zinc-900/40 border border-white/5 p-8 flex flex-col justify-between group hover:bg-zinc-900/60 transition-colors">
                             <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
-                                <Activity className="text-blue-400" size={24} />
+                                <ScanLine className="text-blue-400" size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold mb-2">Medical Logic</h3>
-                                <p className="text-zinc-400">Med-Gemma correlates scans with conditions like Diabetes or Asthma.</p>
+                                <h3 className="text-xl font-bold mb-2">Dual-Vision Scanning</h3>
+                                <p className="text-zinc-400">Powered by Qwen2.5-VL-7B for dense nutrition tables and NutriScan-3B for fresh food visual estimation.</p>
                             </div>
                         </div>
 
@@ -233,6 +233,7 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
                                 <div className="text-zinc-500 mb-2"># 2. Add Secrets to Colab</div>
                                 <div><span className="text-yellow-300">export</span> HF_TOKEN=<span className="text-emerald-300">"hf_..."</span> <span className="text-zinc-500"># HuggingFace token</span></div>
                                 <div className="mt-1"><span className="text-yellow-300">export</span> NGROK_TOKEN=<span className="text-emerald-300">"..."</span> <span className="text-zinc-500"># Free Ngrok authtoken</span></div>
+                                <div className="mt-1"><span className="text-yellow-300">export</span> TAVILY_API_KEY=<span className="text-emerald-300">"tvly_..."</span> <span className="text-zinc-500"># Web Search key</span></div>
                             </div>
 
                             {/* Step 3 */}
