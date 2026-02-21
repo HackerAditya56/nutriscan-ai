@@ -174,6 +174,14 @@ class ApiService {
         const response = await this.client.get<InsightsResponse>(`/insights/${userId}`);
         return response.data;
     }
+
+    /**
+     * Dev Utility: Inject dummy insights via backdoor endpoint
+     */
+    async injectDummyInsights(data: { user_id: string, truth: string, tips: string[] }): Promise<any> {
+        const response = await this.client.post('/insights/override', data);
+        return response.data;
+    }
 }
 
 export const api = new ApiService();

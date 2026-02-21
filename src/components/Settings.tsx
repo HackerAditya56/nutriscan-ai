@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, User2, Activity, Droplets, Heart, X, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, User2, Activity, Droplets, Heart, X, RefreshCcw, Sparkles } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { api } from '../services/api';
@@ -434,6 +434,34 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                             >
                                 Switch Account
                             </button>
+
+                            {/* Dev Utility Button */}
+                            <div className="mt-6 flex justify-center">
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            alert("Injecting perfect dummy insights...");
+                                            await api.injectDummyInsights({
+                                                user_id: userId,
+                                                truth: "Your historical tracking reveals that carbohydrate intake exceeding 200g directly correlates with elevated fasting glucose, while sodium levels above 2000mg are actively exacerbating your Stage 1 Hypertension.",
+                                                tips: [
+                                                    "Cap dinner carbohydrates strictly at 40g to prevent morning blood glucose spikes.",
+                                                    "Restrict daily sodium intake to under 1500mg by swapping processed meats for fresh, whole proteins.",
+                                                    "Incorporate a 15-minute brisk walk immediately following your highest-carb meal to manually improve insulin sensitivity."
+                                                ]
+                                            });
+                                            alert("Dummy insights injected successfully! Navigate to Tips to view them.");
+                                        } catch (e: any) {
+                                            console.error(e);
+                                            alert("Failed to inject insights: " + (e.response?.data?.detail || e.message));
+                                        }
+                                    }}
+                                    className="text-[10px] text-zinc-600 border border-zinc-800 rounded-lg px-3 py-1.5 font-bold uppercase tracking-wider hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-1 mx-auto"
+                                >
+                                    <Sparkles size={12} className="text-blue-500" />
+                                    Dev: Inject Insights
+                                </button>
+                            </div>
                         </div>
 
                         {/* Activity Inference (New) */}
