@@ -78,8 +78,11 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
     const streakDays = (() => {
         if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
 
-        // Get unique dates sorted descending
-        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.timestamp || item.time || Date.now()).toDateString())))
+        // FIX: Prioritize timestamp OVER time! Filter out Invalid Dates.
+        const dateStrings = dashboardData.history
+            .map(item => new Date(item.timestamp || item.time || Date.now()).toDateString())
+            .filter(d => d !== "Invalid Date");
+        const dates = Array.from(new Set(dateStrings))
             .map(d => new Date(d))
             .sort((a, b) => b.getTime() - a.getTime());
 
@@ -141,8 +144,9 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         const loggedDayIndices = new Set<number>();
 
         dashboardData.history.forEach(h => {
+            // FIX: Prioritize timestamp here too! Ensure date is valid before checking.
             const d = new Date(h.timestamp || h.time || Date.now());
-            if (d >= startOfWeek && d <= endOfWeek) {
+            if (!isNaN(d.getTime()) && d >= startOfWeek && d <= endOfWeek) {
                 const dayIndex = d.getDay(); // 0-6
                 const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // 0=Mon, 6=Sun
                 loggedDayIndices.add(mappedIndex);
