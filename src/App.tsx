@@ -26,7 +26,12 @@ type Tab = 'home' | 'scanner' | 'results' | 'profile' | 'tips' | 'truth' | 'onbo
 type AppView = 'splash' | 'setup' | 'offline' | 'app' | 'landing';
 
 function App() {
-  const [currentView, setCurrentView] = useState<AppView>('splash');
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    const apiUrl = localStorage.getItem('apiBaseUrl');
+    const userId = localStorage.getItem('userId');
+    const isOnboarded = localStorage.getItem('onboardingCompleted');
+    return (apiUrl && userId && isOnboarded) ? 'splash' : 'landing';
+  });
   const [activeTab, setActiveTab] = useState<Tab>('onboard');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [foodLog] = useState<FoodItem[]>([]);
