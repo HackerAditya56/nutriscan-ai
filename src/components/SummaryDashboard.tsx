@@ -78,15 +78,9 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
     const streakDays = (() => {
         if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
 
-        // Extract all valid dates prioritizing the ISO timestamp
-        const dateStrings = dashboardData.history
-            .map(item => new Date(item.timestamp || item.time || Date.now()).toDateString())
-            .filter(d => d !== "Invalid Date");
-
-        // For demo purposes, we do not punish date gaps. 
-        // We just return the total number of unique days tracked to guarantee a high streak!
-        const uniqueDays = new Set(dateStrings);
-        return uniqueDays.size;
+        // As requested for the presentation, force the streak to 21 days
+        // since the Nutridex log history contains 21 items (20 past + today).
+        return 21;
     })();
 
     const weekDays = [
@@ -99,35 +93,11 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         { day: 'S', status: 'pending' },
     ];
 
-    // Logic: Only show ticks for THIS week (Mon-Sun relative to current date)
+    // Logic: Force all 7 days to be checked for the presentation demo
+    // so it perfectly matches the 20-day streak aesthetic
     if (dashboardData?.history) {
-        const now = new Date();
-        const dayOfWeek = now.getDay(); // 0 (Sun) to 6 (Sat)
-        // Calculate start of week (Monday)
-        // If Sunday (0), go back 6 days. If Mon (1), go back 0 days.
-        const diff = now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(diff);
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-
-        const loggedDayIndices = new Set<number>();
-
-        dashboardData.history.forEach(h => {
-            // FIX: timestamp MUST be first! Ensure the date is mathematically valid.
-            const d = new Date(h.timestamp || h.time || Date.now());
-            if (!isNaN(d.getTime()) && d >= startOfWeek && d <= endOfWeek) {
-                const dayIndex = d.getDay(); // 0-6
-                const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // 0=Mon, 6=Sun
-                loggedDayIndices.add(mappedIndex);
-            }
-        });
-
-        weekDays.forEach((d, idx) => {
-            if (loggedDayIndices.has(idx)) d.status = 'checked';
+        weekDays.forEach((d) => {
+            d.status = 'checked';
         });
     }
 

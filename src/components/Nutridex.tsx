@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, BarChart3, TrendingUp, PieChart, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, TrendingUp, PieChart, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card } from './ui/Card';
 import { cn } from '../lib/utils';
@@ -180,10 +180,21 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
 
             {view === 'week' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <Card className="bg-zinc-900 border-zinc-800 p-6 flex flex-col items-center justify-center min-h-[200px]">
-                        <BarChart3 size={48} className="text-zinc-700 mb-4" />
-                        <p className="text-zinc-500 font-medium">Weekly Analysis Chart</p>
-                        <p className="text-xs text-zinc-600">(Requires more history)</p>
+                    <Card className="bg-zinc-900 border-zinc-800 p-6 flex flex-col items-center justify-center min-h-[220px]">
+                        <div className="w-full flex items-end justify-between h-32 mb-4 px-2">
+                            {/* Dummy Bar Chart for Demo */}
+                            {[60, 85, 40, 75, 90, 50, 80].map((h, i) => (
+                                <div key={i} className="flex flex-col items-center gap-2">
+                                    <div className="w-8 bg-zinc-800 rounded-t-sm relative group cursor-pointer hover:bg-zinc-700 transition-colors" style={{ height: '100%' }}>
+                                        <div className="absolute bottom-0 left-0 w-full bg-emerald-500 rounded-t-sm" style={{ height: `${h}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] text-zinc-500 font-bold uppercase">
+                                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-zinc-400 font-bold text-sm">Weekly Caloric Intake</p>
                     </Card>
 
                     <div className="space-y-4">
@@ -195,17 +206,8 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                                 <span className="font-bold text-white">Avg. Calories</span>
                             </div>
                             <span className="text-xl font-bold">
-                                {(() => {
-                                    if (!log || log.length === 0) return 0;
-                                    const oneWeekAgo = new Date();
-                                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                                    const recentLogs = log.filter(l => new Date(l.timestamp || l.time).getTime() >= oneWeekAgo.getTime());
-                                    if (recentLogs.length === 0) return 0;
-                                    const total = recentLogs.reduce((acc, curr) => acc + (curr.calories || 0), 0);
-                                    // Average over 7 days or days active? Let's say days active for now
-                                    const uniqueDays = new Set(recentLogs.map(l => new Date(l.timestamp || l.time).toDateString())).size;
-                                    return Math.round(total / (uniqueDays || 1)).toLocaleString();
-                                })()}
+                                {/* DEMO OVERRIDE: Hardcode demo average */}
+                                {(1840).toLocaleString()}
                             </span>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-zinc-900 rounded-2xl">
@@ -215,7 +217,11 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                                 </div>
                                 <span className="font-bold text-white">Macro Balance</span>
                             </div>
-                            <span className="text-sm font-bold text-zinc-400">Calculated Daily</span>
+                            <div className="flex gap-2 text-xs font-bold">
+                                <span className="text-emerald-500">40% P</span>
+                                <span className="text-amber-500">35% C</span>
+                                <span className="text-orange-500">25% F</span>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
@@ -224,19 +230,28 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
             {view === 'month' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                     <div className="grid grid-cols-7 gap-2">
-                        {/* Dynamic Calendar Grid */}
+                        {/* Dynamic Calendar Grid - DEMO OVERRIDE */}
                         {(() => {
-                            const daysInMonth = 30; // Simply showing last 30 days window or current month
+                            const daysInMonth = 30;
                             const grid = [];
 
-                            // Map logs to dates
-                            const logMap = new Set(log.map(l => new Date(l.timestamp || l.time).getDate()));
+                            // DEMO: We want exactly 21 days checked, ending on the 21st (today)
+                            // This means days 1 through 21 (inclusive) should be checked.
 
                             for (let i = 1; i <= daysInMonth; i++) {
-                                // Simple mock for "current month day i" - in real app would match actual dates
-                                const isLogged = logMap.has(i);
+                                const isDemoLogged = i >= 1 && i <= 21;
+                                const isToday = i === 21;
+
                                 grid.push(
-                                    <div key={i} className={`aspect-square rounded-lg flex items-center justify-center text-xs font-bold ${isLogged ? 'bg-emerald-900/40 text-emerald-500' : 'bg-zinc-900 text-zinc-600'}`}>
+                                    <div
+                                        key={i}
+                                        className={cn(
+                                            "aspect-square rounded-lg flex items-center justify-center text-xs font-bold transition-all",
+                                            isToday ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
+                                                isDemoLogged ? "bg-emerald-900/40 text-emerald-500" :
+                                                    "bg-zinc-900 text-zinc-600"
+                                        )}
+                                    >
                                         {i}
                                     </div>
                                 );
@@ -247,10 +262,7 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                     <div className="p-4 bg-zinc-900 rounded-2xl">
                         <h4 className="font-bold text-white mb-2">Monthly Insights</h4>
                         <p className="text-sm text-zinc-500">
-                            {(() => {
-                                const loggedDays = new Set(log.map(l => new Date(l.timestamp || l.time).toDateString())).size;
-                                return `You tracked food on ${loggedDays} days this month.`;
-                            })()}
+                            You tracked food on 21 days this month. Keep up the amazing work!
                         </p>
                     </div>
                 </motion.div>
