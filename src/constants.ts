@@ -43,7 +43,7 @@ export interface FoodItem {
     subIngredients?: SubIngredient[];
     comparison_note?: string; // e.g. "Healthy limit: <5g sugar"
     tags?: string[];
-    aiAnalysis?: string;
+    aiAnalysis?: { item_name?: string; analysis?: string } | string;
     dailySugarPercent?: number; // New field for user progress
 
     // New Fields

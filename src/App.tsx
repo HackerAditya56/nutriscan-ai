@@ -107,7 +107,8 @@ function App() {
       benefits: safeTruth.status === 'safe' ? [safeTruth.title] : [],
       comparison_note: scanResult.comparison_note, // Ensure this is passed
       tags: scanResult.vision_breakdown_list,
-      aiAnalysis: response.ui_cards?.ai_analysis
+      aiAnalysis: response.ui_cards?.ai_analysis,
+      scan_result: scanResult  // Attach raw backend data for Long-Term Impact card
     };
 
     setLastScan(mappedItem);

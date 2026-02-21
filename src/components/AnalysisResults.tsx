@@ -358,18 +358,78 @@ export const AnalysisResults = ({ item, onLog, onRetake, isHistoryView = false }
                         </div>
                     )}
 
-                    {item.aiAnalysis && (
-                        <div className="mt-4 bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 p-2">
-                                <div className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-900/20">
-                                    <Sparkles size={10} className="text-blue-200" /> AI ANALYSIS
+                    {/* Enhanced AI Analysis & Long Term Impact */}
+                    <div className="space-y-4 mt-6">
+                        {/* 1. Standard AI Analysis */}
+                        {item.aiAnalysis && (
+                            <div className="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 p-2">
+                                    <div className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-900/20">
+                                        <Sparkles size={10} className="text-blue-200" /> AI SUMMARY
+                                    </div>
+                                </div>
+                                <div className="pt-8 space-y-2">
+                                    {typeof item.aiAnalysis === 'object' ? (
+                                        <>
+                                            {item.aiAnalysis.item_name && (
+                                                <p className="text-white text-sm font-bold">{item.aiAnalysis.item_name}</p>
+                                            )}
+                                            <p className="text-zinc-300 text-sm leading-relaxed font-medium">
+                                                {item.aiAnalysis.analysis || 'Analysis complete.'}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <p className="text-zinc-300 text-sm leading-relaxed font-medium">
+                                            {String(item.aiAnalysis)}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                            <p className="text-zinc-400 text-sm italic leading-relaxed pt-8 font-medium">
-                                "{item.aiAnalysis}"
-                            </p>
-                        </div>
-                    )}
+                        )}
+
+                        {/* 2. Long-Term Health Impact (Pulled directly from raw backend response) */}
+                        {((item as any).scan_result?.health_implication || item.message) && (
+                            <div className="bg-gradient-to-br from-emerald-950/40 to-zinc-900 rounded-2xl p-5 border border-emerald-900/30 relative overflow-hidden">
+                                {/* Subtle glow */}
+                                <div className="absolute top-0 right-0 w-32 h-32 blur-3xl rounded-full pointer-events-none opacity-10 bg-emerald-500" />
+
+                                <div className="absolute top-0 left-0 p-2">
+                                    <div className="bg-emerald-600 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-emerald-900/20">
+                                        <Activity size={10} className="text-emerald-200" /> LONG-TERM IMPACT
+                                    </div>
+                                </div>
+                                <p className="text-emerald-50/80 text-sm italic leading-relaxed pt-8 font-medium">
+                                    "{(item as any).scan_result?.health_implication || item.message}"
+                                </p>
+                            </div>
+                        )}
+
+                        {/* 3. Catch-All: Render any extra scan_result fields not already shown */}
+                        {(() => {
+                            const sr = (item as any).scan_result;
+                            if (!sr || typeof sr !== 'object') return null;
+                            const shownKeys = new Set(['verdict', 'health_implication', 'summary_grid', 'food_name', 'macros', 'tags', 'risks', 'swaps', 'ui_cards', 'vision_breakdown_list', 'comparison_note']);
+                            const extraEntries = Object.entries(sr).filter(
+                                ([key, val]) => !shownKeys.has(key) && val !== undefined && val !== null && val !== ''
+                            );
+                            if (extraEntries.length === 0) return null;
+                            return (
+                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50 space-y-3">
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">AI INSIGHTS</p>
+                                    {extraEntries.map(([key, val]) => (
+                                        <div key={key} className="flex flex-col gap-0.5">
+                                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
+                                                {key.replace(/_/g, ' ')}
+                                            </span>
+                                            <p className="text-zinc-300 text-sm font-medium leading-relaxed">
+                                                {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </motion.div>
             )}
 
