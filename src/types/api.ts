@@ -206,7 +206,7 @@ export interface DashboardResponse {
 export interface UserProfile {
     name: string;
     age: number;
-    gender: string;
+    gender: 'Male' | 'Female' | 'Other' | 'M' | 'F';
     height: number;
     weight: number;
     bloodType?: string;
@@ -215,18 +215,11 @@ export interface UserProfile {
     activity_level_inference?: string;
     recommended_limits?: {
         daily_calories: number;
-        daily_sugar_g: number;
-        daily_protein_g?: number;
-        daily_carbs_g?: number;
-        daily_fat_g?: number;
-        bmr?: number;
-    };
-    custom_goals?: {
-        daily_calories: number;
         daily_protein_g: number;
         daily_carbs_g: number;
         daily_fat_g: number;
-        daily_sugar_g: number;
+        daily_sugar_g?: number;
+        daily_sodium_mg?: number;
     };
 }
 
@@ -284,4 +277,14 @@ export interface UpdateProfileRequest {
 export interface PingResponse {
     status: string;
     message: string;
+}
+
+// ========== INSIGHTS ==========
+
+export interface InsightsResponse {
+    success: boolean;
+    data: {
+        truth: string;
+        tips: string[];
+    }
 }

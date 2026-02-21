@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { useZxing } from 'react-zxing';
 // Removed unused imageCompression import
-import { Camera, Zap, RotateCcw, X, Leaf } from 'lucide-react';
+import { Camera, Zap, RotateCcw, X, Leaf, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { api } from '../services/api';
@@ -51,6 +51,70 @@ export const Scanner = ({ onScanComplete }: ScannerProps) => {
 
     // Photo Scanner Setup
     const [webcamRef, setWebcamRef] = useState<Webcam | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const imageSrc = reader.result as string;
+
+            // FREEZE FRAME: Show captured image immediately
+            setCapturedImage(imageSrc);
+            setIsScanning(true);
+            setError(null);
+
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                setError("User ID not found.");
+                setCapturedImage(null);
+                setIsScanning(false);
+                return;
+            }
+
+            try {
+                // RAW HIGH-RES CAPTURE - NO COMPRESSION
+                // Direct Base64 send for maximum AI clarity
+                const rawBase64 = imageSrc.replace(/^data:image\/\w+;base64,/, "");
+                console.log("Sending Uploaded Image (Length):", rawBase64.length);
+
+                const loc = await getCurrentLocation();
+
+                try {
+                    let response;
+                    const commonData = {
+                        user_id: userId,
+                        image_base64: rawBase64,
+                        latitude: loc.latitude,
+                        longitude: loc.longitude,
+                        persona: 'witty' as const
+                    };
+
+                    if (scanMode === 'Fresh') {
+                        response = await api.scanFood(commonData);
+                    } else {
+                        response = await api.scan(commonData);
+                    }
+
+                    onScanComplete(response, imageSrc);
+                } catch (apiErr) {
+                    console.error("API Error:", apiErr);
+                    setError("Server error. Try again.");
+                    setCapturedImage(null);
+                    setIsScanning(false);
+                }
+
+            } catch (err) {
+                console.error("Upload error:", err);
+                setError("Image processing failed.");
+                setCapturedImage(null);
+                setIsScanning(false);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
 
     const getCurrentLocation = (): Promise<{ latitude: number; longitude: number }> => {
         return new Promise((resolve) => {
@@ -381,18 +445,48 @@ export const Scanner = ({ onScanComplete }: ScannerProps) => {
                         </button>
                     </div>
 
-                    {/* Shutter Button - Only for Photo/Fresh modes */}
-                    {scanMode !== 'Barcode' && (
-                        <div className="relative">
+                    {/* Controls Row */}
+                    <div className="flex items-center gap-8 relative mt-2 w-full justify-center">
+                        <div className="w-12" /> {/* Layout balancer */}
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                            {/* Shutter Button - Only for Photo/Fresh modes */}
+                            {scanMode !== 'Barcode' ? (
+                                <button
+                                    onClick={handleManualCapture}
+                                    disabled={isScanning}
+                                    className="w-20 h-20 rounded-full border-4 border-white/20 flex items-center justify-center relative active:scale-95 transition-transform"
+                                >
+                                    <div className="w-16 h-16 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)] transition-shadow"></div>
+                                </button>
+                            ) : (
+                                <div className="w-20 h-20 flex items-center justify-center">
+                                    <div className="text-zinc-600 text-[10px] font-bold tracking-widest flex flex-col items-center gap-2 uppercase">
+                                        <RotateCcw size={20} className="animate-[spin_4s_linear_infinite] opacity-50" />
+                                        Auto
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Upload Button */}
+                        <div className="w-12 h-12 flex items-center justify-center">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                            />
                             <button
-                                onClick={handleManualCapture}
+                                onClick={() => fileInputRef.current?.click()}
                                 disabled={isScanning}
-                                className="w-20 h-20 rounded-full border-4 border-white/20 flex items-center justify-center relative active:scale-95 transition-transform"
+                                className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-400 active:scale-95 transition-all border border-zinc-800 hover:bg-zinc-800 hover:text-white shadow-lg"
+                                title="Upload Picture"
                             >
-                                <div className="w-16 h-16 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)] transition-shadow"></div>
+                                <Upload size={20} />
                             </button>
                         </div>
-                    )}
+                    </div>
                 </div>
             )}
 

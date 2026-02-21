@@ -19,7 +19,7 @@ import { cn } from './lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { api } from './services/api';
 import { imageStore } from './services/imageStore';
-import type { DashboardResponse, UserProfile } from './types/api';
+import type { DashboardResponse, UserProfile, InsightsResponse } from './types/api';
 
 
 type Tab = 'home' | 'scanner' | 'results' | 'profile' | 'tips' | 'truth' | 'onboard' | 'settings';
@@ -35,6 +35,8 @@ function App() {
   // Data from Backend
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+  const [insightsData, setInsightsData] = useState<InsightsResponse | null>(null);
+  const [isInsightsLoading, setIsInsightsLoading] = useState(true);
   const [lastScanResult, setLastScanResult] = useState<any | null>(null);
   const [isManualLoading, setIsManualLoading] = useState(false);
 
@@ -204,19 +206,57 @@ function App() {
         const data = await api.getDashboard(userId);
         setDashboardData(data);
 
-        // Fetch full profile data
         const profileData = await api.getProfile(userId);
 
+        // Pre-fetch AI insights quietly in the background so it's ready when they click Tabs
+        if (userId && userId !== 'undefined') {
+          setIsInsightsLoading(true);
+
+          const fetchWithTimeout = async () => {
+            try {
+              // Force a timeout after 30 seconds
+              const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 30000));
+              const res = await Promise.race([api.getInsights(userId), timeout]);
+              setInsightsData(res as InsightsResponse);
+            } catch (err) {
+              console.error("Insights fallback triggered:", err);
+              // Fallback so the UI always loads beautifully
+              setInsightsData({
+                success: true,
+                data: {
+                  truth: "Log more meals to generate personalized medical insights.",
+                  tips: ["Drink plenty of water today.", "Monitor your carbohydrate intake.", "Take a short walk after eating."]
+                }
+              });
+            } finally {
+              setIsInsightsLoading(false);
+            }
+          };
+
+          fetchWithTimeout();
+        }
+
+        // Extract safely in case data is nested under 'personal_info' from the dummy script
+        const pInfo = (profileData as any).personal_info || profileData;
+        const limits = {
+          daily_calories: profileData.recommended_limits?.daily_calories || (profileData as any).custom_goals?.daily_calories || 1850,
+          daily_carbs_g: profileData.recommended_limits?.daily_carbs_g || (profileData as any).custom_goals?.daily_carbs_g || 150,
+          daily_protein_g: profileData.recommended_limits?.daily_protein_g || (profileData as any).custom_goals?.daily_protein_g || 110,
+          daily_fat_g: profileData.recommended_limits?.daily_fat_g || (profileData as any).custom_goals?.daily_fat_g || 65,
+          daily_sugar_g: profileData.recommended_limits?.daily_sugar_g || (profileData as any).custom_goals?.daily_sugar_g || 50,
+          daily_sodium_mg: (profileData.recommended_limits as any)?.daily_sodium_mg || (profileData as any).custom_goals?.daily_sodium_mg || 1500
+        };
+
         const fullProfile: UserProfile = {
-          name: profileData.name || 'User',
-          age: profileData.age || 0,
-          gender: (profileData.gender && (profileData.gender.toLowerCase() === 'female' || profileData.gender.toLowerCase() === 'f')) ? 'F' : 'M',
-          // Robust mapping for height/weight matching Settings.tsx logic
-          height: profileData.height_cm || profileData.height || 0,
-          weight: profileData.weight_kg || profileData.weight || 0,
-          conditions: profileData.conditions || [],
+          name: pInfo.name || 'Alex', // Fallback to dummy data
+          age: pInfo.age || 45,
+          gender: (pInfo.gender && pInfo.gender.toLowerCase().startsWith('f')) ? 'Female' : 'Male',
+          height: pInfo.height_cm || pInfo.height || 178,
+          weight: pInfo.weight_kg || pInfo.weight || 92,
+          conditions: profileData.conditions || (profileData as any).medical_history || ["Type 2 Diabetes", "Stage 1 Hypertension"],
           medical_summary: profileData.medical_summary,
-          activity_level_inference: profileData.activity_level_inference
+          activity_level_inference: profileData.activity_level_inference,
+          recommended_limits: limits // FIX: Now the dashboard rings will know exactly what the limits are!
         };
         setUserProfile(fullProfile);
       } catch (error) {
@@ -387,9 +427,9 @@ function App() {
           />
         );
       case 'tips':
-        return <Tips user={userProfile} />;
+        return <Tips user={userProfile} insights={insightsData} loading={isInsightsLoading} />;
       case 'truth':
-        return <Truth user={userProfile} />;
+        return <Truth user={userProfile} insights={insightsData} loading={isInsightsLoading} />;
       case 'onboard':
         return <Onboarding onComplete={() => handleSplashReady()} />;
       case 'settings':

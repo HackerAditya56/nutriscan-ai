@@ -1,17 +1,21 @@
 import { Activity, HeartPulse, AlertOctagon, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+
 import { Card } from './ui/Card';
-import type { UserProfile } from '../types/api';
+
+import type { UserProfile, InsightsResponse } from '../types/api';
 
 interface TruthProps {
     user: UserProfile | null;
+    insights: InsightsResponse | null;
+    loading: boolean;
 }
 
-export const Truth = ({ user }: TruthProps) => {
+export const Truth = ({ user, insights, loading }: TruthProps) => {
     // Determine risk level based on user data
     // Default to "Safe" for new users
     const hasConditions = user?.conditions && user.conditions.length > 0;
-    const isNewUser = !user || (user.conditions.length === 0 && user.age === 0);
+    const isNewUser = !user || (!hasConditions && user.age === 0 && user.weight === 0);
 
     if (isNewUser) {
         return (
@@ -28,7 +32,6 @@ export const Truth = ({ user }: TruthProps) => {
     }
 
     // Dynamic Content
-    const conditionsList = user.conditions.join(", ");
     const riskTitle = hasConditions ? "Health Risks Detected" : "Moderate Health Profile";
     const riskColor = hasConditions ? "text-red-500" : "text-amber-500";
     const bgGradient = hasConditions ? "from-red-950" : "from-amber-950";
@@ -55,9 +58,17 @@ export const Truth = ({ user }: TruthProps) => {
                     </div>
                     <div className="relative z-10">
                         <h2 className={`text-2xl font-bold ${riskColor} mb-2`}>{riskTitle}</h2>
-                        <p className="text-zinc-300 leading-relaxed">
-                            Based on your profile ({conditionsList}), our AI has identified potential long-term risks if dietary guidelines are not followed.
-                        </p>
+                        {loading ? (
+                            <div className="animate-pulse space-y-2 mt-4">
+                                <div className="h-4 bg-zinc-800/50 rounded w-3/4"></div>
+                                <div className="h-4 bg-zinc-800/50 rounded w-full"></div>
+                                <div className="h-4 bg-zinc-800/50 rounded w-5/6"></div>
+                            </div>
+                        ) : (
+                            <p className="text-zinc-300 leading-relaxed font-medium">
+                                {insights?.data?.truth || "Failed to load insights. Please try again later."}
+                            </p>
+                        )}
                     </div>
                 </Card>
 
@@ -68,7 +79,7 @@ export const Truth = ({ user }: TruthProps) => {
                             <HeartPulse size={20} className="text-red-500" /> Specific Concerns
                         </h3>
                         <div className="grid grid-cols-1 gap-3">
-                            {user.conditions.includes('Diabetes') && (
+                            {user.conditions.some(c => c.toLowerCase().includes('diabetes')) && (
                                 <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold text-xl">🩸</div>
                                     <div>
@@ -77,7 +88,7 @@ export const Truth = ({ user }: TruthProps) => {
                                     </div>
                                 </div>
                             )}
-                            {user.conditions.includes('Hypertension') && (
+                            {user.conditions.some(c => c.toLowerCase().includes('hypertension') || c.toLowerCase().includes('blood pressure')) && (
                                 <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-xl">🫀</div>
                                     <div>
@@ -87,7 +98,7 @@ export const Truth = ({ user }: TruthProps) => {
                                 </div>
                             )}
                             {/* Generic Fallback */}
-                            {!user.conditions.includes('Diabetes') && !user.conditions.includes('Hypertension') && (
+                            {!user.conditions.some(c => c.toLowerCase().includes('diabetes') || c.toLowerCase().includes('hypertension') || c.toLowerCase().includes('blood pressure')) && (
                                 <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold text-xl">⚠️</div>
                                     <div>

@@ -14,6 +14,7 @@ import type {
     VerifyScanRequest,
     VerifyScanResponse,
     ManualEntryRequest,
+    InsightsResponse,
 } from '../types/api';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -163,6 +164,14 @@ class ApiService {
      */
     async manualEntry(data: ManualEntryRequest): Promise<ScanResponse> {
         const response = await this.client.post<ScanResponse>('/manual-entry', data);
+        return response.data;
+    }
+
+    /**
+     * Get AI insights for a user
+     */
+    async getInsights(userId: string): Promise<InsightsResponse> {
+        const response = await this.client.get<InsightsResponse>(`/insights/${userId}`);
         return response.data;
     }
 }

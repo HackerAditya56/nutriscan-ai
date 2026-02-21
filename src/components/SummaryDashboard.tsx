@@ -69,7 +69,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
     // Use Real Data
     const calories = {
         current: dashboardData?.macro_rings?.calories?.consumed || 0,
-        total: dashboardData?.macro_rings?.calories?.limit || user?.recommended_limits?.daily_calories || 2000
+        total: dashboardData?.macro_rings?.calories?.limit || user?.recommended_limits?.daily_calories || 1850 // Changed fallback to 1850
     };
     const rawProgress = calories.total > 0 ? (calories.current / calories.total) * 100 : 0;
     const progress = Number.isFinite(rawProgress) ? Math.min(rawProgress, 100) : 0;
@@ -79,7 +79,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         if (!dashboardData?.history || dashboardData.history.length === 0) return 0;
 
         // Get unique dates sorted descending
-        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.time || item.timestamp || Date.now()).toDateString())))
+        const dates = Array.from(new Set(dashboardData.history.map(item => new Date(item.timestamp || item.time || Date.now()).toDateString())))
             .map(d => new Date(d))
             .sort((a, b) => b.getTime() - a.getTime());
 
@@ -141,7 +141,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
         const loggedDayIndices = new Set<number>();
 
         dashboardData.history.forEach(h => {
-            const d = new Date(h.time || h.timestamp || Date.now());
+            const d = new Date(h.timestamp || h.time || Date.now());
             if (d >= startOfWeek && d <= endOfWeek) {
                 const dayIndex = d.getDay(); // 0-6
                 const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // 0=Mon, 6=Sun
@@ -159,7 +159,7 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
             <Nutridex
                 onBack={() => setShowNutridex(false)}
                 consumed={dashboardData?.macro_rings?.calories?.consumed || 0}
-                limit={dashboardData?.macro_rings?.calories?.limit || 2000}
+                limit={dashboardData?.macro_rings?.calories?.limit || user?.recommended_limits?.daily_calories || 1850}
                 log={dashboardData?.history || []} // Use real history from API
                 onItemClick={onHistoryItemClick}
             />
@@ -264,15 +264,15 @@ export const SummaryDashboard = ({ user, dashboardData, onRefresh, onHistoryItem
                         <MacroCircle
                             label="PROTEIN"
                             current={dashboardData?.macro_rings?.protein?.consumed || 0}
-                            total={dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 150}
-                            percent={(() => { const lim = dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 150; const con = dashboardData?.macro_rings?.protein?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
+                            total={dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 110}
+                            percent={(() => { const lim = dashboardData?.macro_rings?.protein?.limit || user?.recommended_limits?.daily_protein_g || 110; const con = dashboardData?.macro_rings?.protein?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
                             color="stroke-emerald-500"
                         />
                         <MacroCircle
                             label="CARBS"
                             current={dashboardData?.macro_rings?.carbs?.consumed || 0}
-                            total={dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 250}
-                            percent={(() => { const lim = dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 250; const con = dashboardData?.macro_rings?.carbs?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
+                            total={dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 150}
+                            percent={(() => { const lim = dashboardData?.macro_rings?.carbs?.limit || user?.recommended_limits?.daily_carbs_g || 150; const con = dashboardData?.macro_rings?.carbs?.consumed || 0; return lim > 0 ? Math.min(Math.round((con / lim) * 100), 100) : 0; })()}
                             color="stroke-amber-400"
                         />
                         <MacroCircle

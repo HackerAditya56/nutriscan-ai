@@ -126,6 +126,8 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                                         <div className="w-12 h-12 rounded-xl bg-zinc-800 overflow-hidden flex-shrink-0 border border-zinc-700">
                                             {loadedImages[item.time] ? (
                                                 <img src={loadedImages[item.time]} className="w-full h-full object-cover" alt="Food" />
+                                            ) : item.local_image_uri ? (
+                                                <img src={item.local_image_uri} className="w-full h-full object-cover" alt="Food" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-zinc-600">
                                                     <ImageIcon size={16} />
@@ -197,11 +199,11 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                                     if (!log || log.length === 0) return 0;
                                     const oneWeekAgo = new Date();
                                     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                                    const recentLogs = log.filter(l => new Date(l.time) >= oneWeekAgo);
+                                    const recentLogs = log.filter(l => new Date(l.timestamp || l.time).getTime() >= oneWeekAgo.getTime());
                                     if (recentLogs.length === 0) return 0;
                                     const total = recentLogs.reduce((acc, curr) => acc + (curr.calories || 0), 0);
                                     // Average over 7 days or days active? Let's say days active for now
-                                    const uniqueDays = new Set(recentLogs.map(l => new Date(l.time).toDateString())).size;
+                                    const uniqueDays = new Set(recentLogs.map(l => new Date(l.timestamp || l.time).toDateString())).size;
                                     return Math.round(total / (uniqueDays || 1)).toLocaleString();
                                 })()}
                             </span>
@@ -228,7 +230,7 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                             const grid = [];
 
                             // Map logs to dates
-                            const logMap = new Set(log.map(l => new Date(l.time).getDate()));
+                            const logMap = new Set(log.map(l => new Date(l.timestamp || l.time).getDate()));
 
                             for (let i = 1; i <= daysInMonth; i++) {
                                 // Simple mock for "current month day i" - in real app would match actual dates
@@ -246,7 +248,7 @@ export const Nutridex = ({ onBack, consumed, limit, log, onItemClick }: Nutridex
                         <h4 className="font-bold text-white mb-2">Monthly Insights</h4>
                         <p className="text-sm text-zinc-500">
                             {(() => {
-                                const loggedDays = new Set(log.map(l => new Date(l.time).toDateString())).size;
+                                const loggedDays = new Set(log.map(l => new Date(l.timestamp || l.time).toDateString())).size;
                                 return `You tracked food on ${loggedDays} days this month.`;
                             })()}
                         </p>
