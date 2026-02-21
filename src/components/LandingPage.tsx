@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
     Shield, Zap, ArrowRight,
-    ScanLine, Brain, Activity, Terminal, Sparkles
+    ScanLine, Brain, Terminal, Sparkles
 } from 'lucide-react';
 import { Button } from './ui/Button';
 
