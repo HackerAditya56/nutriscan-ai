@@ -1,417 +1,140 @@
-# 🍎 NutriScan AI
+# 🍎 NutriScan AI: The Smart Food Scanner for Your Health
 
-**AI-Powered Food Scanner & Personalized Nutrition Tracker**
+<div align="center">
 
-NutriScan AI is an intelligent nutrition tracking application that leverages computer vision and AI to instantly analyze food items, provide personalized health insights, and help users achieve their nutritional goals. Scan any food package, ingredient label, or dish to get real-time macro breakdowns, health warnings, and smart alternatives.
+[![Kaggle Submission](https://img.shields.io/badge/Kaggle-Submission-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white)](#link-to-kaggle-submission)
+[![Backend Repository](https://img.shields.io/badge/Backend-Repository-000000?style=for-the-badge&logo=github&logoColor=white)](#link-to-backend-repo)
 
----
+![App Demo GIF](public/screenshots/app_demo.png)
 
-## ✨ Features
+</div>
 
-### 🔍 **AI-Powered Food Scanning**
-- **Instant Label Recognition**: Scan nutrition labels and ingredient lists with your camera
-- **Dish Detection**: AI identifies dishes and estimates macronutrients when no label is present
-- **Barcode Support**: Quick lookup via barcode scanning (using react-zxing)
-- **Offline Image Compression**: Optimized image handling with browser-image-compression
+## 🤖 Core AI Models (Powered by Kaggle)
+*   **[Qwen/Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct):** The "OCR text reader", accurately extracts complex tables and ingredient lists from nutritional labels.
+*   **[HackerAditya56/NutriScan-3B](https://huggingface.co/HackerAditya56/NutriScan-3B):** Custom 3B adapter (Qwen2.5-VL-3B-based) tuned explicitly for fresh food estimation and dish detection.
+*   **[google/medgemma-1.5-4b-it](https://huggingface.co/google/medgemma-1.5-4b-it):** The "Medical Agent." Uses the parsed nutritional info alongside the user's specific biometric data to flag personalized risks and verdicts.
 
-### 📊 **Real-Time Nutrition Dashboard**
-- **Macro Rings**: Beautiful animated circular progress indicators for:
-  - Calories
-  - Protein
-  - Carbs
-  - Fat
-  - Sugar
-- **Live Updates**: Dashboard automatically refreshes after logging food
-- **Daily Targets**: Customizable macro goals based on user profile
+## 🚨 The Problem: Eating Shouldn't Be a Guessing Game
 
-### 🎯 **Nutridex Score System**
-- **Health Score**: 0-100 rating based on your daily nutrition quality
-- **Personalized Messages**: Context-aware feedback on your eating habits
-- **History Tracking**: View detailed logs with macro breakdowns and tags
-- **Interactive Timeline**: Today/Week/Month views with insights
+Have you ever stared at a dense, confusing nutritional label and wondered: *"Is this actually safe for me?"* For individuals managing health conditions like **Diabetes, Asthma, or severe allergies**, a single misjudged ingredient can have immediate and serious consequences. 
 
-### ⚠️ **Smart Health Alerts**
-- **Type-Based Warnings**: `SAFE`, `WARNING`, `DANGER`, `ALLERGY` classifications
-- **Personalized Risks**: Tailored alerts for pre-existing conditions (e.g., Pre-Diabetic, Asthma)
-- **Ingredient Analysis**: Deep dive into sub-ingredients with health implications
-- **Smart Swaps**: AI-suggested healthier alternatives
-
-### 🧬 **Personalized User Profiles**
-- **Bio-Tracking**: Age, gender, height, weight, blood type
-- **Health Conditions**: Track conditions like diabetes, allergies, asthma
-- **Custom Goals**: Set and edit daily macro targets
-- **Progress Monitoring**: Visual feedback on goal completion
-
-### 🎨 **Premium UI/UX**
-- **Dark Mode Design**: Sleek, modern interface with glassmorphism effects
-- **Smooth Animations**: Framer Motion-powered transitions
-- **Responsive Layout**: Mobile-first design (works on PWA/web)
-- **Onboarding Flow**: Interactive 4-step setup wizard with loading animations
-
-### 📜 **Food Logging & History**
-- **One-Click Tracking**: Log scanned food instantly
-- **Rich History**: View past meals with:
-  - Food name & calories
-  - Macro badges (P/C/F/S)
-  - Health tags (e.g., "High Protein", "Spicy")
-  - Thumbnails (cached in IndexedDB)
-- **Details View**: Click any history item to see full analysis
-
-### 🧠 **AI Analysis Engine**
-- **RAG-Enhanced**: Uses retrieval-augmented generation for medical context
-- **Multi-Model Backend**: Hybrid vision architecture (Qwen2.5-VL-7B for nutrition labels + Qwen2.5-VL-3B for fresh food + MedGemma)
-- **Personalized Insights**: Analysis considers user's health profile
-- **Smart Fallbacks**: Switches between label reading and dish estimation automatically
+The world needs a solution that bridges the gap between complex food science and everyday decision-making. **NutriScan AI** empowers users with instant, hyper-personalized health insights—turning overwhelming labels into clear, decisive action.
 
 ---
 
-## 🚀 Tech Stack
+## 📸 Screenshots
 
-### **Frontend**
-- **Framework**: React 19 + TypeScript
-- **Build Tool**: Vite 5
-- **Styling**: TailwindCSS 3 + Custom CSS
-- **Animations**: Framer Motion 12
-- **Icons**: Lucide React
-- **Camera**: React Webcam
-- **Barcode**: React ZXing
-- **HTTP Client**: Axios
-- **State Management**: React Hooks (useState, useEffect)
-
-### **Backend** (Python - Ngrok Tunnel)
-- **Vision Models**:
-  - Qwen/Qwen2.5-VL-7B-Instruct (Nutrition Label Scanner)
-  - Qwen/Qwen2.5-VL-3B-Instruct (Fresh Food Detection & Estimation)
-  - google/medgemma-1.5-4b-it (Medical Analysis)
-- **RAG**: BAAI/bge-m3 embeddings
-- **Framework**: FastAPI (assumed based on endpoints)
-- **Quantization**: 4-bit for efficiency
-
-### **Storage**
-- **Local Storage**: User profiles, settings, image mappings
-- **IndexedDB**: Cached food images (via imageStore service)
-- **Session State**: React context for active scan results
+| Home Dashboard | AI Analysis & Health Warnings |
+| :---: | :---: |
+| ![Home Dashboard Screenshot](public/screenshots/home_dashboard.png) | ![Analysis Result Screenshot](public/screenshots/result.png) |
+| **User Profile & Bio-Tracking** | **Nutridex History** |
+| ![Profile Setup Screenshot](public/screenshots/analysis_loading.png) | ![Nutridex Timeline Screenshot](public/screenshots/nutridex_timeline.png) |
 
 ---
 
-## 📦 Installation
+## 🧠 AI & Multi-Agent Architecture (Front-and-Center)
+We didn't just build a scanner; we built a **Privacy-First, Dual-Vision AI Health Partner**. NutriScan AI's intelligence is powered by a sophisticated multi-agent system designed for speed, accuracy, and rigorous user privacy.
 
-### **Prerequisites**
-- Node.js 18+ and npm
-- Python 3.9+ (for backend)
-- GPU with 18GB+ VRAM recommended for backend models
+*   **Qwen2.5-VL-7B-Instruct & NutriScan-3B (Vision Agents):** Our "Readers & Estimators." Need to scan a dense nutrition table? The 7B model instantly extracts the deepest OCR details. Scanning a fresh plate of food? The specialized 3B adapter acts as an estimator, visually breaking down ingredients and macros on the fly.
+*   **Google Med-Gemma 1.5-4b-it (Medical Agent):** Our "Health Specialist." Raw data isn't enough. Med-Gemma leverages advanced clinical context to cross-reference food data with your specific bio-profile (e.g., Asthma, Pre-Diabetic). 
 
-### **Frontend Setup**
+### 🛡️ Privacy-First & Secure Data Handling
+Your health data is exclusively yours. All user profiles and biometric data are securely managed via **Local Storage / IndexedDB**. When our system utilizes prompt engineering to calculate personalized health risks, we ensure sensitive data flows directly between the securely tunneled backend and the client—**never stored or exposed on external servers**.
+
+---
+
+## ⚙️ System Architecture 
+
+```mermaid
+flowchart TD
+    %% Frontend
+    subgraph Frontend ["React / Vite Frontend"]
+        UI[User Interface]
+        Scan[Camera / Scanner Module]
+        Dash[Real-Time Dashboard]
+    end
+
+    %% Local Data
+    subgraph LocalData ["Client Storage (Privacy First)"]
+        LS[(Local Storage: Profiles/Goals)]
+        IDB[(IndexedDB: Image Cache)]
+    end
+
+    %% Backend
+    subgraph Backend ["FastAPI Backend"]
+        API[API Gateway]
+        Prompt[Prompt Engineering Engine]
+    end
+
+    %% AI Models
+    subgraph AI ["AI Models (Multi-Agent System)"]
+        Qwen[Qwen2.5-VL: Vision & Extraction]
+        MedGemma[Med-Gemma: Medical Analysis]
+    end
+
+    %% Flows
+    UI <--> LS
+    Scan <--> IDB
+    UI -->|Image + Health Profile| API
+    API --> Qwen
+    Qwen -->|Extracted Macros/Ingredients| Prompt
+    Prompt --> MedGemma
+    MedGemma -->|Health Verdict & Risks| API
+    API -->|Personalized Insights| Dash
+```
+
+---
+
+## ✨ Features That Supercharge Your Diet
+
+*   🔍 **AI Vision Engine:** Instantly decode nutrition labels or estimate macros for fresh, unlabelled dishes.
+*   📊 **Real-Time Interactive Dashboard:** Dazzling macro rings (Calories, Protein, Carbs, Fat, Sugar) that animate and react to your daily logs.
+*   ⚠️ **Smart Health Alerts:** Get direct, color-coded health verdicts (`SAFE`, `WARNING`, `DANGER`, `ALLERGY`) uniquely tailored to *your* medical conditions.
+*   🎯 **The Nutridex Score System:** A 0-100 rating algorithm that grades your daily nutrition quality and builds interactive timelines.
+*   🎨 **Premium Design & UX:** Stunning dark-mode aesthetics, Framer Motion-powered transitions, and fully responsive layouts that feel like a native app.
+
+---
+
+## 🚀 Installation & Local Setup
+
+> **Heads up!** You'll need the FastAPI backend running for the AI to process images. Make sure you point the `.env` file to your active backend tunnel (e.g., Ngrok).
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
+# 1. Clone the repo and navigate into it
+git clone https://github.com/your-username/nutriscan-ai.git
 cd nutriscan-ai
 
-# Install dependencies
+# 2. Install Dependencies
 npm install
 
-# Configure API endpoint
-# Edit .env file (default: http://localhost:8000)
+# 3. Configure API Environment
 echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 
-# Start development server
+# 4. Fire up the Development Server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-### **Backend Setup** (Python)
-
-> **Note**: The backend requires a separate Python server. Ensure it's running and accessible via the URL in `.env`.
-
-```bash
-# Example backend startup (adjust based on your implementation)
-# The backend should expose these endpoints:
-# POST /api/scan - Image analysis
-# POST /api/log - Food logging
-# GET /api/dashboard - Dashboard data
-# GET /api/setup - Initial user setup
-
-# If using Ngrok:
-ngrok http 8000
-# Update VITE_API_BASE_URL in .env with the Ngrok URL
 ```
 
 ---
 
-## 🎮 Usage
+## 🔮 What's Next? (Future Roadmap)
 
-### **1. Onboarding**
-On first launch, complete the 4-step setup:
-1. **Welcome**: Introduction to NutriScan AI
-2. **Profile**: Enter age, gender, height, weight
-3. **Health**: Add blood type and conditions (e.g., "Pre-Diabetic")
-4. **Sync**: Connect to backend and fetch personalized goals
+We're barely scratching the surface of what NutriScan AI can do. Our visionary roadmap includes:
 
-### **2. Scanning Food**
-1. Navigate to the **Scan** tab (camera icon)
-2. Point camera at:
-   - Nutrition label (preferred)
-   - Barcode
-   - Or take a photo of the dish
-3. Review AI analysis with:
-   - Health verdict (SAFE/WARNING/DANGER)
-   - Macro breakdown
-   - Personalized risks
-   - Smart swaps
-
-### **3. Logging & Tracking**
-1. After scanning, click **"Track Food"**
-2. Dashboard automatically updates with new data
-3. View updated macro rings on **Home** tab
-4. Check **Nutridex** for history and insights
-
-### **4. Managing Goals**
-1. Open **Home** tab
-2. Click **Edit Goals** (pencil icon)
-3. Adjust daily targets for Calories, Protein, Carbs, Fat, Sugar
-4. Save to update dashboard rings
-
-### **5. Viewing History**
-1. Navigate to **Nutridex** (tap the Nutridex banner on Home or click history icon in app bar)
-2. Browse **Today/Week/Month** views
-3. Click any food item to see full details
-4. Review macro badges and health tags
-
----
-
-## 🗂️ Project Structure
-
-```
-nutriscan-ai/
-├── src/
-│   ├── components/           # React components
-│   │   ├── AnalysisResults.tsx    # Food scan results UI
-│   │   ├── SummaryDashboard.tsx   # Main dashboard with macro rings
-│   │   ├── Scanner.tsx            # Camera + barcode scanner
-│   │   ├── Nutridex.tsx           # History & insights
-│   │   ├── Onboarding.tsx         # 4-step setup wizard
-│   │   ├── Profile.tsx            # User profile management
-│   │   ├── EditGoals.tsx          # Macro target editor
-│   │   ├── Layout.tsx             # App shell with navigation
-│   │   └── ui/                    # Reusable UI components
-│   │       ├── Button.tsx
-│   │       ├── Card.tsx
-│   │       ├── Badge.tsx
-│   │       └── Progress.tsx
-│   ├── services/            # API & storage services
-│   │   ├── api.ts               # Backend API client
-│   │   └── imageStore.ts        # IndexedDB image cache
-│   ├── types/               # TypeScript definitions
-│   │   └── api.ts               # API response types
-│   ├── lib/                 # Utilities
-│   │   └── utils.ts             # Helpers (e.g., cn for classnames)
-│   ├── constants.ts         # App constants & mock data
-│   ├── App.tsx              # Root component with routing logic
-│   ├── main.tsx             # Entry point
-│   └── index.css            # Global styles
-├── public/                  # Static assets
-├── .env                     # Environment variables
-├── package.json             # Dependencies
-├── vite.config.ts           # Vite configuration
-├── tailwind.config.js       # TailwindCSS config
-└── tsconfig.json            # TypeScript config
-```
-
----
-
-## 🔌 API Integration
-
-### **Base URL**
-Set in `.env`:
-```
-VITE_API_BASE_URL=https://your-ngrok-url.ngrok.io
-```
-
-### **Endpoints**
-
-#### **POST /api/scan**
-Analyze a food image.
-
-**Request:**
-```typescript
-{
-  user_id: string;
-  image: string; // Base64-encoded image
-  user_profile: {
-    age: number;
-    gender: string;
-    height: number;
-    weight: number;
-    blood_type: string;
-    conditions: string[];
-  };
-  daily_sugar: number; // Current sugar intake in grams
-}
-```
-
-**Response:**
-```typescript
-{
-  item_name: string;
-  calories: number;
-  macros: { p: number; c: number; f: number; s: number };
-  verdict: "SAFE" | "WARNING" | "DANGER";
-  health_implication: string;
-  risks?: string[];
-  swaps?: string[];
-  tags?: string[];
-  summary_grid?: Array<{ emoji: string; label: string; value: string }>;
-}
-```
-
-#### **POST /api/log**
-Log a food item to history.
-
-**Request:**
-```typescript
-{
-  user_id: string;
-  food_data: {
-    name: string;
-    calories: number;
-    macros: { p: number; c: number; f: number; s: number };
-    tags?: string[];
-  };
-}
-```
-
-**Response:**
-```typescript
-{
-  success: boolean;
-  message: string;
-}
-```
-
-#### **GET /api/dashboard?user_id={userId}**
-Fetch dashboard data (totals, history, Nutridex score).
-
-**Response:**
-```typescript
-{
-  macro_rings: {
-    calories: { consumed: number; limit: number };
-    protein: { consumed: number; limit: number };
-    carbs: { consumed: number; limit: number };
-    fat: { consumed: number; limit: number };
-  };
-  totals: { protein: number; carbs: number; fat: number; sugar: number };
-  history: Array<{
-    time: string;
-    food: string;
-    calories: number;
-    macros?: { p: number; c: number; f: number; s?: number };
-    tags?: string[];
-  }>;
-  nutridex_score: number; // 0-100
-  message: string; // Personalized feedback
-}
-```
-
-#### **POST /api/setup**
-Initialize user profile on backend.
-
-**Request:**
-```typescript
-{
-  user_id: string;
-  profile: UserProfile;
-}
-```
-
----
-
-## 🎨 Design Philosophy
-
-NutriScan AI prioritizes **premium aesthetics** and **user engagement**:
-
-1. **Visual Hierarchy**: Macro rings use vibrant gradients (emerald, blue, amber, rose)
-2. **Micro-Animations**: Smooth transitions on load, hover, and state changes
-3. **Glassmorphism**: Frosted glass effects for cards and modals
-4. **Typography**: Uses system fonts with bold weights for clarity
-5. **Color-Coded Feedback**:
-   - 🟢 Green: SAFE foods
-   - 🟡 Yellow: WARNING (moderate concern)
-   - 🔴 Red: DANGER (high risk for user's profile)
-   - 🔵 Blue: ALLERGY alert
-
----
-
-## 🧪 Testing & Validation
-
-### **Type Safety**
-- Full TypeScript coverage with strict mode
-- ESLint configured for React best practices
-
-### **Build Verification**
-```bash
-npm run build
-# Should complete without errors
-```
-
-### **Linting**
-```bash
-npm run lint
-```
-
----
-
-## 🛣️ Roadmap
-
-- [ ] **Multi-Day Charts**: Weekly/Monthly macro trend graphs
-- [ ] **Recipe Scanner**: Detect and log multi-ingredient meals
-- [ ] **Export Data**: CSV/PDF reports for nutritionists
-- [ ] **Social Features**: Share meals, challenge friends
-- [ ] **Meal Planning**: AI-generated daily meal plans
-- [ ] **Wearable Integration**: Sync with Fitbit, Apple Health
-- [ ] **Offline Mode**: Cache scans for later sync
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### **Code Style**
-- Use TypeScript for all new components
-- Follow the existing file structure
-- Add comments for complex logic
-- Test on both mobile and desktop viewports
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License. See `LICENSE` file for details.
+*   ⌚ **Wearable Data Integration:** Sync with Smartwatches and **Continuous Glucose Monitors (CGMs)** to validate food impact against real-time blood sugar spikes!
+*   🌐 **Expanded Local Privacy Framework:** Migrating even more of the multi-agent decision processing entirely on-device to ensure zero-latency, 100% offline security.
+*   🥗 **AI-Generated Meal Prep:** Leveraging Med-Gemma to dynamically build weekly grocery lists directly from an automated analysis of your previously safe-scanned foods.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **AI Models**: Qwen2.5-VL, MedGemma by Alibaba/Google
-- **Icons**: Lucide React
-- **Animations**: Framer Motion
-- **Inspiration**: Modern nutrition apps like MyFitnessPal, Yazio
+*   **AI Models**: Qwen2.5-VL, MedGemma by Alibaba/Google.
+*   **Icons & Assets**: Lucide React.
+*   **Animations**: Framer Motion.
+*   *Built specially for the Kaggle Med-Gemma Impact Challenge*
 
 ---
 
-**Built with ❤️ by [Your Name/Team]**
-
-> *Empowering healthier choices, one scan at a time.*
+<div align="center">
+  <b>Built with ❤️ by <a href="#link-to-your-github">Aditya Nandan</a></b>
+</div>
