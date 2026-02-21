@@ -1,6 +1,6 @@
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
-import { Lightbulb, Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { Lightbulb, Sparkles, ChevronRight, Zap, Target, Flame, Leaf, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import type { UserProfile, InsightsResponse } from '../types/api';
@@ -15,14 +15,23 @@ const containerVars: any = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
-        transition: { staggerChildren: 0.1 }
+        transition: { staggerChildren: 0.15 } // Slower stagger for dramatic effect
     }
 };
 
 const itemVars: any = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20 } }
 };
+
+const ICONS = [Sparkles, Target, Leaf, Activity, Flame, Lightbulb];
+const COLORS = [
+    { bg: 'bg-indigo-500/10', iconBg: 'bg-indigo-500/20', text: 'text-indigo-400', border: 'border-indigo-500/20', hoverBorder: 'hover:border-indigo-500/50', gradient: 'from-indigo-500' },
+    { bg: 'bg-emerald-500/10', iconBg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/20', hoverBorder: 'hover:border-emerald-500/50', gradient: 'from-emerald-500' },
+    { bg: 'bg-rose-500/10', iconBg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/20', hoverBorder: 'hover:border-rose-500/50', gradient: 'from-rose-500' },
+    { bg: 'bg-amber-500/10', iconBg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/20', hoverBorder: 'hover:border-amber-500/50', gradient: 'from-amber-500' },
+    { bg: 'bg-blue-500/10', iconBg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/20', hoverBorder: 'hover:border-blue-500/50', gradient: 'from-blue-500' }
+];
 
 export const Tips = ({ user, insights, loading }: TipsProps) => {
     // Generate tips based on conditions
@@ -77,40 +86,68 @@ export const Tips = ({ user, insights, loading }: TipsProps) => {
                                 ))}
                             </div>
                         ) : insights?.data?.tips?.length ? (
-                            <motion.div variants={containerVars} initial="hidden" animate="show" className="space-y-4">
-                                {insights.data.tips.map((tip, idx) => (
-                                    <motion.div key={idx} variants={itemVars}>
-                                        <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/60 relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-300 hover:shadow-[0_4px_20px_rgba(99,102,241,0.05)] hover:-translate-y-0.5">
-                                            {/* Decorative Background Icon */}
-                                            <div className="absolute -right-6 -top-6 opacity-0 group-hover:opacity-5 transition-transform duration-500 rotate-12 transform group-hover:rotate-0">
-                                                <Sparkles size={120} />
-                                            </div>
+                            <motion.div variants={containerVars} initial="hidden" animate="show" className="space-y-5">
+                                {insights.data.tips.map((tip, idx) => {
+                                    const isHero = idx === 0;
+                                    const color = COLORS[idx % COLORS.length];
+                                    const Icon = ICONS[idx % ICONS.length];
 
-                                            <div className="flex items-start gap-4 relative z-10 p-1">
-                                                <div className="p-2.5 bg-indigo-500/10 rounded-xl shrink-0 mt-0.5 group-hover:bg-indigo-500/20 transition-colors">
-                                                    <Sparkles size={20} className="text-indigo-400" />
+                                    return (
+                                        <motion.div key={idx} variants={itemVars}>
+                                            <Card className={`relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 ${isHero
+                                                    ? 'bg-gradient-to-br from-indigo-950/60 to-black border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.15)] p-6'
+                                                    : `bg-zinc-900/40 backdrop-blur-xl border-zinc-800/60 ${color.hoverBorder} p-5 hover:bg-zinc-900/60`
+                                                }`}>
+
+                                                {/* Decorative Background Effects */}
+                                                {isHero && <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] pointer-events-none rounded-full" />}
+                                                <div className={`absolute -right-8 -top-8 transition-transform duration-700 rotate-12 transform group-hover:rotate-0 scale-150 ${isHero ? 'opacity-10 text-indigo-500' : 'opacity-0 group-hover:opacity-5 text-current'
+                                                    }`}>
+                                                    <Icon size={140} />
                                                 </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-400/80">AI Suggestion</span>
+
+                                                <div className={`flex gap-4 relative z-10 ${isHero ? 'flex-col sm:flex-row items-start' : 'items-start'}`}>
+                                                    <div className={`p-3.5 rounded-2xl shrink-0 transition-all duration-300 group-hover:scale-110 shadow-lg ${isHero ? color.iconBg : color.bg}`}>
+                                                        <Icon size={isHero ? 28 : 22} className={color.text} />
                                                     </div>
-                                                    <p className="text-zinc-300 text-sm leading-relaxed font-medium">{tip}</p>
-                                                </div>
-                                            </div>
 
-                                            {/* Subtle left border gradient */}
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                        </Card>
-                                    </motion.div>
-                                ))}
+                                                    <div className="flex-1 w-full">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest ${color.text}`}>
+                                                                {isHero ? "Priority Insight" : "Daily Recommendation"}
+                                                            </span>
+                                                            {isHero && (
+                                                                <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[9px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse flex items-center gap-1 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+                                                                    <Sparkles size={10} /> Top Pick
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className={`font-medium leading-relaxed ${isHero ? 'text-white text-lg' : 'text-zinc-300 text-sm'}`}>
+                                                            {tip}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Subtle left border gradient for non-hero items */}
+                                                {!isHero && (
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b ${color.gradient} to-transparent`} />
+                                                )}
+                                            </Card>
+                                        </motion.div>
+                                    );
+                                })}
                             </motion.div>
                         ) : (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <Card className="bg-zinc-900/30 border-zinc-800/50 text-center py-12 flex flex-col items-center justify-center">
-                                    <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4 text-zinc-600">
-                                        <Lightbulb size={24} />
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                                <Card className="bg-zinc-900/30 border-zinc-800/50 text-center py-16 flex flex-col items-center justify-center relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-950/50" />
+                                    <div className="w-20 h-20 bg-zinc-800/50 rounded-full flex items-center justify-center mb-6 text-zinc-500 relative z-10 shadow-inner border border-zinc-800/80">
+                                        <Lightbulb size={32} />
                                     </div>
-                                    <p className="text-zinc-400 text-sm max-w-[200px]">Log more meals to generate personalized insights.</p>
+                                    <h3 className="text-xl font-bold text-white mb-2 relative z-10">Insights Loading...</h3>
+                                    <p className="text-zinc-400 text-sm max-w-xs relative z-10 leading-relaxed text-center">
+                                        Track more meals to help the AI generate highly customized health tips for you.
+                                    </p>
                                 </Card>
                             </motion.div>
                         )}
