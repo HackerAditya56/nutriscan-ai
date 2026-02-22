@@ -445,9 +445,9 @@ export const Settings = ({ userId, onBack }: SettingsProps) => {
                                                 user_id: userId,
                                                 truth: "Your historical tracking reveals that carbohydrate intake exceeding 200g directly correlates with elevated fasting glucose, while sodium levels above 2000mg are actively exacerbating your Stage 1 Hypertension.",
                                                 tips: [
-                                                    "Cap dinner carbohydrates strictly at 40g to prevent morning blood glucose spikes.",
-                                                    "Restrict daily sodium intake to under 1500mg by swapping processed meats for fresh, whole proteins.",
-                                                    "Incorporate a 15-minute brisk walk immediately following your highest-carb meal to manually improve insulin sensitivity."
+                                                    "You only hit 160 grams of carbs out of your 185-gram target, so you'll need more energy tomorrow.",
+                                                    "You missed your water goal by half a liter—make sure to hydrate!",
+                                                    "To help manage your logged hypertension today, consider taking a short evening walk."
                                                 ]
                                             });
                                             alert("Dummy insights injected successfully! Navigate to Tips to view them.");

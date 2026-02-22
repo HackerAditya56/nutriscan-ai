@@ -89,19 +89,31 @@ export const Tips = ({ user, insights, loading }: TipsProps) => {
                             <motion.div variants={containerVars} initial="hidden" animate="show" className="space-y-5">
                                 {insights.data.tips.map((tip, idx) => {
                                     const isHero = idx === 0;
-                                    const color = COLORS[idx % COLORS.length];
-                                    const Icon = ICONS[idx % ICONS.length];
+                                    const isMedicalWarning = tip.toLowerCase().includes('hypertension') || tip.toLowerCase().includes('missed') || tip.toLowerCase().includes('hit 160 grams');
+
+                                    // Default styling vs Medical Warning styling
+                                    const baseColor = COLORS[idx % COLORS.length];
+                                    const color = isMedicalWarning ? {
+                                        bg: 'bg-red-500/10',
+                                        text: 'text-red-500',
+                                        iconBg: 'bg-red-500/20',
+                                        border: 'border-red-500/30',
+                                        hoverBorder: 'hover:border-red-500/50',
+                                        gradient: 'from-red-500/20'
+                                    } : baseColor;
+
+                                    const Icon = isMedicalWarning ? Lightbulb : ICONS[idx % ICONS.length];
 
                                     return (
                                         <motion.div key={idx} variants={itemVars}>
                                             <Card className={`relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 ${isHero
-                                                    ? 'bg-gradient-to-br from-indigo-950/60 to-black border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.15)] p-6'
+                                                    ? `bg-gradient-to-br ${isMedicalWarning ? 'from-red-950/80' : 'from-indigo-950/60'} to-black ${isMedicalWarning ? 'border-red-500/50' : 'border-indigo-500/30'} shadow-[0_0_30px_rgba(${isMedicalWarning ? '239,68,68' : '99,102,241'},0.15)] p-6`
                                                     : `bg-zinc-900/40 backdrop-blur-xl border-zinc-800/60 ${color.hoverBorder} p-5 hover:bg-zinc-900/60`
                                                 }`}>
 
                                                 {/* Decorative Background Effects */}
-                                                {isHero && <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] pointer-events-none rounded-full" />}
-                                                <div className={`absolute -right-8 -top-8 transition-transform duration-700 rotate-12 transform group-hover:rotate-0 scale-150 ${isHero ? 'opacity-10 text-indigo-500' : 'opacity-0 group-hover:opacity-5 text-current'
+                                                {isHero && <div className={`absolute top-0 right-0 w-64 h-64 ${isMedicalWarning ? 'bg-red-500/10' : 'bg-indigo-500/10'} blur-[80px] pointer-events-none rounded-full`} />}
+                                                <div className={`absolute -right-8 -top-8 transition-transform duration-700 rotate-12 transform group-hover:rotate-0 scale-150 ${isHero ? `opacity-10 ${color.text}` : 'opacity-0 group-hover:opacity-5 text-current'
                                                     }`}>
                                                     <Icon size={140} />
                                                 </div>
@@ -114,23 +126,43 @@ export const Tips = ({ user, insights, loading }: TipsProps) => {
                                                     <div className="flex-1 w-full">
                                                         <div className="flex items-center justify-between mb-2">
                                                             <span className={`text-[10px] font-black uppercase tracking-widest ${color.text}`}>
-                                                                {isHero ? "Priority Insight" : "Daily Recommendation"}
+                                                                {isMedicalWarning ? "Medical Alert" : (isHero ? "Priority Insight" : "Daily Recommendation")}
                                                             </span>
                                                             {isHero && (
-                                                                <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[9px] text-indigo-300 font-bold uppercase tracking-widest animate-pulse flex items-center gap-1 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
-                                                                    <Sparkles size={10} /> Top Pick
+                                                                <span className={`px-2.5 py-1 rounded-full ${isMedicalWarning ? 'bg-red-500/20 border-red-500/30 text-red-300 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.3)]'} border text-[9px] font-bold uppercase tracking-widest animate-pulse flex items-center gap-1`}>
+                                                                    <Sparkles size={10} /> Action Required
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <p className={`font-medium leading-relaxed ${isHero ? 'text-white text-lg' : 'text-zinc-300 text-sm'}`}>
+                                                        <p className={`font-medium leading-relaxed ${isHero ? 'text-white text-lg' : 'text-zinc-300 text-sm'} ${isMedicalWarning && !isHero ? 'text-red-100' : ''}`}>
                                                             {tip}
                                                         </p>
+
+                                                        {/* Visual UI Bars for Impact */}
+                                                        {isMedicalWarning && tip.includes('160 grams') && (
+                                                            <div className="mt-4 bg-zinc-950 rounded-full h-2 w-full overflow-hidden border border-zinc-800">
+                                                                <div className="bg-red-500 h-full rounded-full w-[86%]" />
+                                                            </div>
+                                                        )}
+                                                        {isMedicalWarning && tip.includes('water goal') && (
+                                                            <div className="mt-4 bg-zinc-950 rounded-full h-2 w-full overflow-hidden border border-zinc-800">
+                                                                <div className="bg-cyan-500 bg-opacity-50 h-full rounded-full w-[60%] border-r-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                                                            </div>
+                                                        )}
+                                                        {isMedicalWarning && tip.includes('hypertension') && (
+                                                            <div className="mt-4 flex gap-1 h-3 w-full">
+                                                                <div className="bg-emerald-500 w-1/4 rounded-sm" />
+                                                                <div className="bg-amber-500 w-1/4 rounded-sm" />
+                                                                <div className="bg-orange-500 w-1/4 rounded-sm" />
+                                                                <div className="bg-red-600 w-1/4 rounded-sm animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.6)]" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 {/* Subtle left border gradient for non-hero items */}
                                                 {!isHero && (
-                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b ${color.gradient} to-transparent`} />
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 opacity-100 transition-opacity duration-300 bg-gradient-to-b ${color.gradient} to-transparent`} />
                                                 )}
                                             </Card>
                                         </motion.div>
