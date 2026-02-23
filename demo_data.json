@@ -1,0 +1,34 @@
+{
+    "demo_insights_override": {
+        "endpoint": "POST /insights/override",
+        "description": "Payload used to force the AI to return specific medical scenarios for the demo.",
+        "payload": {
+            "user_id": "demo_user",
+            "truth": "Your historical tracking reveals that carbohydrate intake exceeding 200g directly correlates with elevated fasting glucose, while sodium levels above 2000mg are actively exacerbating your Stage 1 Hypertension.",
+            "tips": [
+                "You only hit 160 grams of carbs out of your 185-gram target, so you'll need more energy tomorrow.",
+                "You missed your water goal by half a liter—make sure to hydrate!",
+                "To help manage your logged hypertension today, consider taking a short evening walk."
+            ]
+        }
+    },
+    "demo_history_overrides": {
+        "description": "The streak and Nutridex history are hardcoded to perfectly simulate a 21 day period.",
+        "streakDays": 21,
+        "weeklyChart": [
+            60,
+            85,
+            40,
+            75,
+            90,
+            50,
+            80
+        ],
+        "averageCalories": 1840,
+        "macroBalance": {
+            "protein": "40%",
+            "carbs": "35%",
+            "fat": "25%"
+        }
+    }
+}

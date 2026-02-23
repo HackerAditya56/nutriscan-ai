@@ -118,6 +118,25 @@ npm run dev
 
 ---
 
+## 🧪 For Kaggle Judges: How to Test the Demo System
+
+To make evaluating the complex UI and Med-Gemma AI integrations as frictionless as possible without requiring a 3-week real-world testing period, we've built in a "Demo Mode" and several reviewer shortcuts directly into the application:
+
+1. 🔄 **Account Switching**: 
+   * Navigate to the **Settings** (gear icon).
+   * Tap **Switch Account** to seamlessly cycle between pre-configured user profiles (e.g., standard user vs. a user managing Hypertension) without needing backend registration.
+2. 🗓 **The 21-Day Streak & Nutridex**: 
+   * The **Home Dashboard** is pre-configured to simulate a flawless 21-day continuous tracking streak to demonstrate long-term engagement UI. 
+   * Click on the Streak to open your **Nutridex**. You can view the fully populated data visualizations under the **Week** and **Month** tabs.
+3. 🚨 **Triggering Med-Gemma AI Medical Tips**: 
+   * Go to **Settings**.
+   * Scroll down and click the hidden **"Dev: Inject Insights"** button.
+   * Navigate to the **Tips** section (lightbulb icon). You will immediately see the dynamic UI warnings explicitly generated for **Hypertension**, complete with visual deficit progression bars for water intake and carb limits.
+4. 📄 **Dummy Data File**: 
+   * A full JSON reference of the exact payloads used for these demo overrides can be found in `demo_data.json` at the root of this repository.
+
+---
+
 ## 🔮 What's Next? (Future Roadmap)
 
 We're barely scratching the surface of what NutriScan AI can do. Our visionary roadmap includes:
