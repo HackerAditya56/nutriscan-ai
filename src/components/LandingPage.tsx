@@ -176,7 +176,7 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
                                     </div>
                                     <h3 className="text-2xl font-bold mb-3">Bring Your Own API</h3>
                                     <p className="text-zinc-400 leading-relaxed">
-                                        You host the intelligence. Run the provided Colab Notebook to spawn a secure Ngrok tunnel directly to the AI models.
+                                        You host the intelligence. Run the provided Kaggle Notebook to spawn a secure Ngrok tunnel directly to the AI models.
                                     </p>
                                 </div>
                                 <div className="flex-1 w-full bg-black/50 rounded-xl border border-white/10 p-4 font-mono text-sm text-zinc-300">
@@ -221,16 +221,16 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
                         <div className="p-8 font-mono text-sm space-y-8 text-zinc-300">
                             {/* Step 1 */}
                             <div>
-                                <div className="text-zinc-500 mb-2"># 1. Open the Colab Environment</div>
+                                <div className="text-zinc-500 mb-2"># 1. Open the Kaggle Notebook</div>
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                                     <span className="text-purple-400">open</span>
-                                    <a href="#" className="text-emerald-400 border-b border-emerald-400/30 hover:border-emerald-400 truncate">https://colab.research.google.com/drive/...</a>
+                                    <a href="https://www.kaggle.com/code/adityausa/backhand" target="_blank" rel="noopener noreferrer" className="text-emerald-400 border-b border-emerald-400/30 hover:border-emerald-400 truncate">https://www.kaggle.com/code/adityausa/backhand</a>
                                 </div>
                             </div>
 
                             {/* Step 2 */}
                             <div>
-                                <div className="text-zinc-500 mb-2"># 2. Add Secrets to Colab</div>
+                                <div className="text-zinc-500 mb-2"># 2. Add Secrets to Kaggle Notebook</div>
                                 <div><span className="text-yellow-300">export</span> HF_TOKEN=<span className="text-emerald-300">"hf_..."</span> <span className="text-zinc-500"># HuggingFace token</span></div>
                                 <div className="mt-1"><span className="text-yellow-300">export</span> NGROK_TOKEN=<span className="text-emerald-300">"..."</span> <span className="text-zinc-500"># Free Ngrok authtoken</span></div>
                                 <div className="mt-1"><span className="text-yellow-300">export</span> TAVILY_API_KEY=<span className="text-emerald-300">"tvly_..."</span> <span className="text-zinc-500"># Web Search key</span></div>
@@ -265,8 +265,8 @@ export const LandingPage = ({ onStartMagic }: LandingPageProps) => {
                 </div>
                 <p className="text-zinc-500 text-sm mb-4">Built with ❤️ for the Kaggle Med-Gemma Impact Challenge.</p>
                 <div className="flex justify-center gap-6 text-zinc-500 text-sm">
-                    <a href="#" className="hover:text-white transition-colors">GitHub</a>
-                    <a href="#" className="hover:text-white transition-colors">Kaggle Submission</a>
+                    <a href="https://github.com/HackerAditya56/nutriscan-ai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+                    <a href="https://www.kaggle.com/code/adityausa/backhand" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kaggle Backend</a>
                     <a href="#" className="hover:text-white transition-colors">Privacy</a>
                 </div>
             </footer>

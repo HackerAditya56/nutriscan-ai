@@ -4,8 +4,8 @@
 <img src="public/logo.png" alt="NutriScan AI Logo" width="200"/>
 
 
-[![Kaggle Submission](https://img.shields.io/badge/Kaggle-Submission-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white)](#link-to-kaggle-submission)
-[![Backend Repository](https://img.shields.io/badge/Backend-Repository-000000?style=for-the-badge&logo=github&logoColor=white)](#link-to-backend-repo)
+[![Kaggle Backend](https://img.shields.io/badge/Kaggle-Backend-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white)](https://www.kaggle.com/code/adityausa/backhand)
+[![Frontend Repository](https://img.shields.io/badge/Frontend-Repository-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HackerAditya56/nutriscan-ai)
 
 ![App Demo GIF](public/screenshots/app_demo.png)
 
@@ -103,7 +103,7 @@ flowchart TD
 
 ```bash
 # 1. Clone the repo and navigate into it
-git clone https://github.com/your-username/nutriscan-ai.git
+git clone https://github.com/HackerAditya56/nutriscan-ai.git
 cd nutriscan-ai
 
 # 2. Install Dependencies
@@ -115,25 +115,6 @@ echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 # 4. Fire up the Development Server
 npm run dev
 ```
-
----
-
-## 🧪 For Kaggle Judges: How to Test the Demo System
-
-To make evaluating the complex UI and Med-Gemma AI integrations as frictionless as possible without requiring a 3-week real-world testing period, we've built in a "Demo Mode" and several reviewer shortcuts directly into the application:
-
-1. 🔄 **Account Switching**: 
-   * Navigate to the **Settings** (gear icon).
-   * Tap **Switch Account** to seamlessly cycle between pre-configured user profiles (e.g., standard user vs. a user managing Hypertension) without needing backend registration.
-2. 🗓 **The 21-Day Streak & Nutridex**: 
-   * The **Home Dashboard** is pre-configured to simulate a flawless 21-day continuous tracking streak to demonstrate long-term engagement UI. 
-   * Click on the Streak to open your **Nutridex**. You can view the fully populated data visualizations under the **Week** and **Month** tabs.
-3. 🚨 **Triggering Med-Gemma AI Medical Tips**: 
-   * Go to **Settings**.
-   * Scroll down and click the hidden **"Dev: Inject Insights"** button.
-   * Navigate to the **Tips** section (lightbulb icon). You will immediately see the dynamic UI warnings explicitly generated for **Hypertension**, complete with visual deficit progression bars for water intake and carb limits.
-4. 📄 **Dummy Data File**: 
-   * A full JSON reference of the exact payloads used for these demo overrides can be found in `demo_data.json` at the root of this repository.
 
 ---
 
@@ -157,5 +138,5 @@ We're barely scratching the surface of what NutriScan AI can do. Our visionary r
 ---
 
 <div align="center">
-  <b>Built with ❤️ by <a href="#link-to-your-github">Aditya Nandan</a></b>
+  <b>Built with ❤️ by <a href="https://github.com/HackerAditya56">Aditya Nandan</a></b>
 </div>
